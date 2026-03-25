@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | EMS Simulation Lab{% endblock %}
+{% block content %}
+<section class="hero">
+  <span class="pill">Simulação médica orientada por Bedrock</span>
+  <h1>Monte o treino com persona, cenário, especialidade e rubric de avaliação.</h1>
+  <p>Este painel serve como cockpit operacional do projeto. O usuário escolhe o blueprint base e pode sobrescrever a persona, o cenário e a especialidade para abrir uma sessão persistida no banco. O fluxo de conversa roda em WebSocket e cada turno pode ser avaliado automaticamente.</p>
+  <div class="kpis">
+    <div class="kpi"><div class="label">Blueprints ativos</div><div class="value">{{ blueprints|length }}</div></div>
+    <div class="kpi"><div class="label">Personas</div><div class="value">{{ personas|length }}</div></div>
+    <div class="kpi"><div class="label">Cenários</div><div class="value">{{ scenarios|length }}</div></div>
+    <div class="kpi"><div class="label">Especialidades</div><div class="value">{{ specialties|length }}</div></div>
+  </div>
+</section>
+
+<section class="grid grid-2">
+  <div class="card">
+    <h2>Novo laboratório de simulação</h2>
+    <p class="muted">Escolha a composição base. O blueprint puxa política, instruções, contrato de saída e rubrica de avaliação. Persona, cenário e especialidade podem ser ajustados por sessão.</p>
+    <form method="post" action="{% url 'launch-simulation' %}">
+      {% csrf_token %}
+      <div class="field">
+        <label for="id_blueprint">Blueprint</label>
+        {{ launch_form.blueprint }}
+        <div class="help">Conjunto oficial de composição do prompt e da rubrica.</div>
+      </div>
+      <div class="field">
+        <label for="id_persona">Persona médica</label>
+        {{ launch_form.persona }}
+        <div class="help">Sobrescreve a persona padrão do blueprint para a sessão atual.</div>
+      </div>
+      <div class="field">
+        <label for="id_scenario">Cenário clínico</label>
+        {{ launch_form.scenario }}
+        <div class="help">Define o caso, contexto de visita, desafio clínico e objetivo promocional.</div>
+      </div>
+      <div class="field">
+        <label for="id_specialty">Especialidade</label>
+        {{ launch_form.specialty }}
+        <div class="help">Ajusta profundidade clínica, padrões de objeção e linguagem esperada.</div>
+      </div>
+      <button type="submit">Iniciar sessão</button>
+    </form>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>O que este front-end já suporta</h3>
+      <div class="list">
+        <div class="list-item">Seleção administrável de persona, cenário, especialidade e blueprint.</div>
+        <div class="list-item">Criação de sessão persistida com histórico de turns e agent runs.</div>
+        <div class="list-item">Sala de conversa com WebSocket e telemetria por turno.</div>
+        <div class="list-item">Avaliação automática com snapshot de score global e dimensões.</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Catálogo ativo</h3>
+      <div class="list">
+        {% for blueprint in blueprints %}
+          <div class="list-item">
+            <strong>{{ blueprint.title }}</strong><br>
+            <span class="muted">Persona: {{ blueprint.persona.title }} · Cenário: {{ blueprint.scenario.title }} · Especialidade: {{ blueprint.specialty.title }}</span>
+          </div>
+        {% empty %}
+          <div class="list-item">Nenhum blueprint ativo encontrado.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

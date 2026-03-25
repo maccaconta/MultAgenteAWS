@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "BedrockKnowledgeBaseRead",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:GetKnowledgeBase",
+        "bedrock:ListKnowledgeBases"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

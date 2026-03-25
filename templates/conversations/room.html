@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Sala de simulação | EMS Simulation Lab{% endblock %}
+{% block content %}
+<section class="hero">
+  <span class="pill">Sessão #{{ session.id }}</span>
+  <h1>{{ session.title }}</h1>
+  <p>Conduza a visita médica com o especialista simulado. O backend executa consulta, síntese, compliance e avaliação a cada turno.</p>
+</section>
+
+<section class="room-layout">
+  <aside class="grid">
+    <div class="card">
+      <h3>Configuração da sessão</h3>
+      <div class="list">
+        <div class="list-item"><strong>Blueprint</strong><br><span class="muted">{{ session.blueprint.title }}</span></div>
+        <div class="list-item"><strong>Persona</strong><br><span class="muted">{{ session.persona.title }}</span></div>
+        <div class="list-item"><strong>Cenário</strong><br><span class="muted">{{ session.scenario.title }}</span></div>
+        <div class="list-item"><strong>Especialidade</strong><br><span class="muted">{{ session.specialty.title }}</span></div>
+        <div class="list-item"><strong>Status</strong><br><span class="muted">{{ session.status }}</span></div>
+      </div>
+    </div>
+    <div class="card" id="evaluation-panel">
+      <h3>Avaliação corrente</h3>
+      <div class="score" id="score-global">--</div>
+      <div class="muted" style="margin-bottom:10px;">score global da conversa</div>
+      <div id="dimensions"></div>
+      <div style="margin-top:16px;">
+        <strong>Forças</strong>
+        <div class="help" id="strengths">Sem avaliação ainda.</div>
+      </div>
+      <div style="margin-top:16px;">
+        <strong>Melhorias</strong>
+        <div class="help" id="improvements">Sem avaliação ainda.</div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="card">
+    <div class="chat-stream" id="chat-stream">
+      {% for turn in session.turns.all %}
+        <div class="bubble {% if turn.role == 'user' %}user{% else %}assistant{% endif %}">
+          <div class="message-meta">{{ turn.speaker_name|default:turn.get_role_display }} · {{ turn.created_at }}</div>
+          {{ turn.content }}
+        </div>
+      {% empty %}
+        <div class="bubble assistant">
+          <div class="message-meta">Sistema</div>
+          A sessão está pronta. Faça sua primeira abordagem como propagandista.
+        </div>
+      {% endfor %}
+    </div>
+    <div class="composer">
+      <textarea id="message-input" placeholder="Digite a sua abordagem, objeção-resposta ou follow-up clínico."></textarea>
+      <button id="send-button">Enviar</button>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_head %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const sessionId = {{ session.id }};
+  const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  const socket = new WebSocket(`${protocol}://${window.location.host}/ws/simulations/${sessionId}/`);
+  const stream = document.getElementById('chat-stream');
+  const input = document.getElementById('message-input');
+  const button = document.getElementById('send-button');
+
+  function appendBubble(role, speaker, text) {
+    const bubble = document.createElement('div');
+    bubble.className = `bubble ${role === 'user' ? 'user' : 'assistant'}`;
+    const meta = document.createElement('div');
+    meta.className = 'message-meta';
+    meta.textContent = speaker;
+    bubble.appendChild(meta);
+    bubble.appendChild(document.createTextNode(text));
+    stream.appendChild(bubble);
+    stream.scrollTop = stream.scrollHeight;
+  }
+
+  function renderEvaluation(evaluation) {
+    if (!evaluation) return;
+    document.getElementById('score-global').textContent = evaluation.score_global ?? '--';
+    document.getElementById('strengths').textContent = (evaluation.strengths || []).join(' · ') || 'Sem destaque.';
+    document.getElementById('improvements').textContent = (evaluation.improvements || []).join(' · ') || 'Sem recomendações.';
+    const dims = document.getElementById('dimensions');
+    dims.innerHTML = '';
+    const entries = Object.entries(evaluation.dimensions || {});
+    if (!entries.length) {
+      dims.innerHTML = '<div class="help">Dimensões ainda não calculadas.</div>';
+      return;
+    }
+    for (const [key, value] of entries) {
+      const row = document.createElement('div');
+      row.className = 'dim';
+      row.innerHTML = `<span>${key}</span><strong>${typeof value === 'object' ? JSON.stringify(value) : value}</strong>`;
+      dims.appendChild(row);
+    }
+  }
+
+  function sendMessage() {
+    const message = input.value.trim();
+    if (!message) return;
+    appendBubble('user', 'Você', message);
+    socket.send(JSON.stringify({ message }));
+    input.value = '';
+  }
+
+  button.addEventListener('click', sendMessage);
+  input.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
+    }
+  });
+
+  socket.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    if (data.type === 'assistant_message') {
+      appendBubble('assistant', 'Médico simulado', data.reply);
+      renderEvaluation(data.evaluation);
+    } else if (data.type === 'error') {
+      appendBubble('assistant', 'Sistema', data.error || 'Erro no processamento do turno.');
+    }
+  };
+
+  socket.onclose = function () {
+    appendBubble('assistant', 'Sistema', 'Conexão encerrada. Atualize a página para reconectar.');
+  };
+});
+</script>
+{% endblock %}

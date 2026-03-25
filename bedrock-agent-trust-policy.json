@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AmazonBedrockAgentsAssumeRole",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "bedrock.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+

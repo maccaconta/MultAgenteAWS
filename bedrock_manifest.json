@@ -1,0 +1,54 @@
+{
+  "blueprints": {
+    "default": {
+      "supervisor": {
+        "agent_id": "JO0SG5Z8EI",
+        "alias_id": "TSTALIASID"
+      },
+      "collaborators": {
+        "consultation": {
+          "agent_id": "MLP8GVTSYX",
+          "alias_id": "Q7IB3UZ90R"
+        },
+        "synthesis": {
+          "agent_id": "WNPST1YIUL",
+          "alias_id": "O4WXGEL5BJ"
+        },
+        "compliance": {
+          "agent_id": "T1S2H8JUIA",
+          "alias_id": "EOLTUUKZY6"
+        },
+        "evaluation": {
+          "agent_id": "NSHP4AAEKT",
+          "alias_id": "SE4UGP8FTG"
+        }
+      },
+      "knowledge_base_id": "BJWEDBPNJH"
+    },
+    "default-normas": {
+      "supervisor": {
+        "agent_id": "JO0SG5Z8EI",
+        "alias_id": "TSTALIASID"
+      },
+      "collaborators": {
+        "consultation": {
+          "agent_id": "MLP8GVTSYX",
+          "alias_id": "Q7IB3UZ90R"
+        },
+        "synthesis": {
+          "agent_id": "WNPST1YIUL",
+          "alias_id": "O4WXGEL5BJ"
+        },
+        "compliance": {
+          "agent_id": "T1S2H8JUIA",
+          "alias_id": "EOLTUUKZY6"
+        },
+        "evaluation": {
+          "agent_id": "NSHP4AAEKT",
+          "alias_id": "SE4UGP8FTG"
+        }
+      },
+      "knowledge_base_id": "BJWEDBPNJH"
+    }
+  }
+}

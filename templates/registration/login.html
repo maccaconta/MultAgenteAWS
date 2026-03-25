@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Login | EMS Simulation Lab{% endblock %}
+{% block content %}
+<section class="hero">
+  <span class="pill">Autenticação</span>
+  <h1>Entrar no cockpit de simulação</h1>
+  <p>Use um usuário criado no admin do Django para acessar o dashboard, iniciar sessões e abrir a sala em WebSocket.</p>
+</section>
+<div class="card" style="max-width: 480px; margin: 0 auto 24px;">
+  <form method="post">
+    {% csrf_token %}
+    <div class="field">
+      <label for="id_username">Usuário</label>
+      {{ form.username }}
+    </div>
+    <div class="field">
+      <label for="id_password">Senha</label>
+      {{ form.password }}
+    </div>
+    <button type="submit">Entrar</button>
+  </form>
+</div>
+{% endblock %}
