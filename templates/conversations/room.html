@@ -1,18 +1,411 @@
 {% extends "base.html" %}
-{% block title %}Sala de simulação | EMS Simulation Lab{% endblock %}
+{% block title %}Sala de simulação | Treinamento de Propagandistas{% endblock %}
 {% block content %}
 <section class="hero">
   <span class="pill">Sessão #{{ session.id }}</span>
-  <h1>{{ session.title }}</h1>
-  <p>Conduza a visita médica com o especialista simulado. O backend executa consulta, síntese, compliance e avaliação a cada turno.</p>
+  <h1>Treinamento em andamento</h1>
+  <div class="session-hero-card card">
+    <div>
+      <div class="session-hero-kicker">Usuário</div>
+      <div class="session-hero-value">{% firstof request.user.get_full_name request.user.username %}</div>
+    </div>
+    <div>
+      <div class="session-hero-kicker">Especialidade</div>
+      <div class="session-hero-value">{{ session.specialty.title }}</div>
+    </div>
+    <div>
+      <div class="session-hero-kicker">Persona</div>
+      <div class="session-hero-value">{{ session.persona.title }}</div>
+    </div>
+    <div>
+      <div class="session-hero-kicker">Cenário</div>
+      <div class="session-hero-value">{{ session.scenario.title }}</div>
+    </div>
+  </div>
+  <p class="hero-copy">Conduza a visita médica com o especialista simulado. A lateral destaca os eventos confirmados do pipeline com identificação visual clara do agente responsável e status do turno.</p>
 </section>
+
+<style>
+  .session-hero-card {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 18px;
+    padding: 18px 20px;
+    background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
+  }
+  .session-hero-kicker {
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .session-hero-value {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .hero-copy { margin-top: 14px; }
+
+  .session-summary-card {
+    background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  .session-summary-card .list-item {
+    background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.025));
+    border-color: rgba(255,255,255,.05);
+  }
+
+  .chat-card {
+    min-height: 48vh;
+    max-height: 74vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .chat-card .chat-stream {
+    flex: 1;
+    min-height: 260px;
+    max-height: calc(74vh - 108px);
+    padding-right: 8px;
+  }
+
+  .panel-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .panel-title-row h3,
+  .panel-title-row h4 { margin: 0; }
+  .panel-kicker {
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .timeline-panel {
+    position: sticky;
+    top: 92px;
+    align-self: start;
+    height: calc(100vh - 112px);
+    min-height: 560px;
+    max-height: calc(100vh - 112px);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background:
+      radial-gradient(circle at top right, rgba(142,125,255,.12), transparent 32%),
+      linear-gradient(180deg, rgba(15, 27, 52, .98), rgba(10, 20, 39, .98));
+    border-color: rgba(126, 147, 194, .20);
+    overflow: hidden;
+  }
+  .timeline-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: 22px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .timeline-panel-header {
+    flex: 0 0 auto;
+  }
+  .timeline-intro {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.5;
+    font-size: 13px;
+  }
+
+  .timeline-summary {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .timeline-summary-card {
+    padding: 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.06);
+    background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.025));
+    min-width: 0;
+  }
+  .timeline-summary-label {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .timeline-summary-value {
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.35;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .agent-legend {
+    flex: 0 0 auto;
+    display: grid;
+    gap: 8px;
+  }
+  .agent-legend-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .agent-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.06);
+    background: rgba(255,255,255,.03);
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 0;
+  }
+  .agent-chip-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    background: rgba(255,255,255,.08);
+    flex: 0 0 auto;
+  }
+
+  .timeline-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 6px;
+    margin-right: -4px;
+  }
+  .timeline-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+  .timeline-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,.12);
+    border-radius: 999px;
+  }
+  .timeline-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .timeline-feed {
+    display: grid;
+    gap: 12px;
+  }
+
+  .timeline-item {
+    position: relative;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,.06);
+    background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.028));
+    overflow: hidden;
+  }
+  .timeline-item::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: rgba(152,166,199,.55);
+  }
+  .timeline-item.done::before { background: rgba(31,184,116,.95); }
+  .timeline-item.error::before { background: rgba(232,107,122,.95); }
+  .timeline-item.running::before { background: rgba(110,168,255,.95); }
+
+  .timeline-item-inner {
+    padding: 14px 14px 12px 16px;
+  }
+
+  .timeline-item-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: start;
+    margin-bottom: 10px;
+  }
+
+  .timeline-agent {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 10px;
+    min-width: 0;
+    align-items: start;
+  }
+  .timeline-agent-badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    flex: 0 0 auto;
+  }
+  .timeline-agent-meta {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+  }
+  .timeline-agent-label {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .timeline-item-title {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    line-height: 1.35;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .timeline-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.04);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+  .timeline-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(152,166,199,.85);
+    box-shadow: 0 0 0 4px rgba(152,166,199,.10);
+    flex: 0 0 auto;
+  }
+  .timeline-item.running .timeline-status-dot {
+    background: rgba(110,168,255,.95);
+    box-shadow: 0 0 0 4px rgba(110,168,255,.14);
+    animation: pulseTimeline 1.3s ease-in-out infinite;
+  }
+  .timeline-item.done .timeline-status-dot {
+    background: rgba(31,184,116,.95);
+    box-shadow: 0 0 0 4px rgba(31,184,116,.12);
+  }
+  .timeline-item.error .timeline-status-dot {
+    background: rgba(232,107,122,.95);
+    box-shadow: 0 0 0 4px rgba(232,107,122,.12);
+  }
+
+  .timeline-item-message {
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.56;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .timeline-item-time {
+    margin-top: 10px;
+    color: var(--muted-2);
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .timeline-empty {
+    padding: 16px;
+    border-radius: 18px;
+    border: 1px dashed rgba(255,255,255,.12);
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.55;
+    background: rgba(255,255,255,.02);
+  }
+
+  @keyframes pulseTimeline {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.18); opacity: .78; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @media (max-width: 1180px) {
+    .timeline-panel {
+      position: static;
+      height: auto;
+      max-height: none;
+      min-height: 0;
+    }
+    .timeline-scroll {
+      max-height: 520px;
+    }
+  }
+  @media (max-width: 980px) {
+    .session-hero-card { grid-template-columns: 1fr 1fr; }
+    .timeline-summary { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 720px) {
+    .session-hero-card { grid-template-columns: 1fr; }
+    .timeline-item-head {
+      grid-template-columns: 1fr;
+    }
+    .timeline-status {
+      justify-self: start;
+    }
+    .timeline-item-title,
+    .timeline-agent-label,
+    .timeline-summary-value {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+    }
+  }
+</style>
 
 <section class="room-layout">
   <aside class="grid">
-    <div class="card">
-      <h3>Configuração da sessão</h3>
+    <div class="card session-summary-card">
+      <div class="panel-title-row">
+        <div>
+          <div class="panel-kicker">Resumo da sessão</div>
+          <h3>Configuração atual</h3>
+        </div>
+      </div>
       <div class="list">
-        <div class="list-item"><strong>Blueprint</strong><br><span class="muted">{{ session.blueprint.title }}</span></div>
+        <div class="list-item"><strong>Usuário</strong><br><span class="muted">{% firstof request.user.get_full_name request.user.username %}</span></div>
         <div class="list-item"><strong>Persona</strong><br><span class="muted">{{ session.persona.title }}</span></div>
         <div class="list-item"><strong>Cenário</strong><br><span class="muted">{{ session.scenario.title }}</span></div>
         <div class="list-item"><strong>Especialidade</strong><br><span class="muted">{{ session.specialty.title }}</span></div>
@@ -20,7 +413,12 @@
       </div>
     </div>
     <div class="card" id="evaluation-panel">
-      <h3>Avaliação corrente</h3>
+      <div class="panel-title-row">
+        <div>
+          <div class="panel-kicker">Monitoramento</div>
+          <h3>Avaliação corrente</h3>
+        </div>
+      </div>
       <div class="score" id="score-global">--</div>
       <div class="muted" style="margin-bottom:10px;">score global da conversa</div>
       <div id="dimensions"></div>
@@ -35,7 +433,7 @@
     </div>
   </aside>
 
-  <div class="card">
+  <div class="card chat-card">
     <div class="chat-stream" id="chat-stream">
       {% for turn in session.turns.all %}
         <div class="bubble {% if turn.role == 'user' %}user{% else %}assistant{% endif %}">
@@ -54,6 +452,43 @@
       <button id="send-button">Enviar</button>
     </div>
   </div>
+
+  <aside class="card timeline-panel" id="timeline-panel">
+    <div class="timeline-panel-header">
+      <div class="panel-kicker">Pipeline do turno</div>
+      <h3 style="margin:4px 0 8px;">Linha do tempo operacional</h3>
+      <p class="timeline-intro">A lateral destaca o agente responsável, o status da etapa e a mensagem operacional do turno, com leitura rápida mesmo quando os eventos chegam em sequência curta.</p>
+    </div>
+
+    <div class="timeline-summary">
+      <div class="timeline-summary-card">
+        <span class="timeline-summary-label">Agente mais recente</span>
+        <div class="timeline-summary-value" id="timeline-last-agent">Aguardando novo turno</div>
+      </div>
+      <div class="timeline-summary-card">
+        <span class="timeline-summary-label">Status do turno</span>
+        <div class="timeline-summary-value" id="timeline-turn-status">Sem atividade</div>
+      </div>
+    </div>
+
+    <div class="agent-legend">
+      <div class="agent-legend-row">
+        <span class="agent-chip"><span class="agent-chip-icon">⭐</span>Supervisor</span>
+        <span class="agent-chip"><span class="agent-chip-icon">🔍</span>Consulta</span>
+        <span class="agent-chip"><span class="agent-chip-icon">📝</span>Síntese</span>
+      </div>
+      <div class="agent-legend-row">
+        <span class="agent-chip"><span class="agent-chip-icon">🛡️</span>Compliance</span>
+        <span class="agent-chip"><span class="agent-chip-icon">📊</span>Avaliação</span>
+      </div>
+    </div>
+
+    <div class="timeline-scroll" id="timeline-scroll">
+      <div class="timeline-feed" id="timeline-feed">
+        <div class="timeline-empty">Nenhum evento deste turno ainda. Quando você enviar a próxima mensagem, a linha do tempo mostrará as etapas confirmadas pela aplicação com destaque visual do agente responsável.</div>
+      </div>
+    </div>
+  </aside>
 </section>
 {% endblock %}
 {% block extra_head %}
@@ -65,6 +500,35 @@ document.addEventListener('DOMContentLoaded', function () {
   const stream = document.getElementById('chat-stream');
   const input = document.getElementById('message-input');
   const button = document.getElementById('send-button');
+  const timelineFeed = document.getElementById('timeline-feed');
+  const timelineScroll = document.getElementById('timeline-scroll');
+  const timelineLastAgent = document.getElementById('timeline-last-agent');
+  const timelineTurnStatus = document.getElementById('timeline-turn-status');
+
+  const AGENTS = {
+    supervisor: { label: 'Supervisor', icon: '⭐', color: '#E74C3C' },
+    consultation: { label: 'Consulta', icon: '🔍', color: '#3A7AFE' },
+    synthesis: { label: 'Síntese', icon: '📝', color: '#2ECC71' },
+    compliance: { label: 'Compliance', icon: '🛡️', color: '#F39C12' },
+    evaluation: { label: 'Avaliação', icon: '📊', color: '#9B59B6' },
+    system: { label: 'Sistema', icon: '•', color: '#98a6c7' }
+  };
+
+  const STATUS_LABELS = {
+    running: 'Em processamento',
+    done: 'Concluído',
+    error: 'Falha',
+    waiting: 'Aguardando'
+  };
+
+  function formatTimestamp(value) {
+    if (!value) return 'Agora';
+    try {
+      return new Date(value).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    } catch (e) {
+      return 'Atualização recente';
+    }
+  }
 
   function appendBubble(role, speaker, text) {
     const bubble = document.createElement('div');
@@ -98,10 +562,76 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  function updateTimelineSummary(payload, meta) {
+    timelineLastAgent.textContent = meta.label;
+    timelineLastAgent.style.color = meta.color;
+    timelineTurnStatus.textContent = STATUS_LABELS[payload.status] || 'Atualizado';
+  }
+
+  function addTimelineEvent(payload) {
+    if (!payload) return;
+    const empty = timelineFeed.querySelector('.timeline-empty');
+    if (empty) empty.remove();
+
+    const meta = AGENTS[payload.agent] || AGENTS.system;
+    updateTimelineSummary(payload, meta);
+
+    const item = document.createElement('div');
+    item.className = `timeline-item ${payload.status || ''}`;
+    item.innerHTML = `
+      <div class="timeline-item-inner">
+        <div class="timeline-item-head">
+          <div class="timeline-agent">
+            <span class="timeline-agent-badge" style="color:${meta.color};">${meta.icon}</span>
+            <div class="timeline-agent-meta">
+              <span class="timeline-agent-label" style="color:${meta.color};">${meta.label}</span>
+              <div class="timeline-item-title">${payload.title || 'Etapa confirmada'}</div>
+            </div>
+          </div>
+          <span class="timeline-status">
+            <span class="timeline-status-dot"></span>
+            ${STATUS_LABELS[payload.status] || 'Atualizado'}
+          </span>
+        </div>
+        <div class="timeline-item-message">${payload.message || 'Sem detalhe adicional.'}</div>
+        <div class="timeline-item-time">
+          <span>${formatTimestamp(payload.timestamp)}</span>
+          <span>${meta.label}</span>
+        </div>
+      </div>
+    `;
+    timelineFeed.prepend(item);
+    timelineScroll.scrollTop = 0;
+
+    const maxItems = 10;
+    while (timelineFeed.children.length > maxItems) {
+      timelineFeed.removeChild(timelineFeed.lastChild);
+    }
+  }
+
+  function resetTimelineForTurn(userMessage) {
+    timelineFeed.innerHTML = '';
+    addTimelineEvent({
+      agent: 'system',
+      status: 'done',
+      title: 'Mensagem recebida',
+      message: `Turno iniciado com a entrada do usuário: "${userMessage.substring(0, 140)}${userMessage.length > 140 ? '…' : ''}"`,
+      timestamp: new Date().toISOString()
+    });
+    addTimelineEvent({
+      agent: 'supervisor',
+      status: 'running',
+      title: 'Orquestração iniciada',
+      message: 'Supervisor recebeu a mensagem do usuário e iniciou o preparo do turno.',
+      timestamp: new Date().toISOString()
+    });
+  }
+
   function sendMessage() {
     const message = input.value.trim();
     if (!message) return;
     appendBubble('user', 'Você', message);
+    resetTimelineForTurn(message);
     socket.send(JSON.stringify({ message }));
     input.value = '';
   }
@@ -116,11 +646,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
   socket.onmessage = function (event) {
     const data = JSON.parse(event.data);
+    if (data.type === 'timeline_event') {
+      addTimelineEvent(data);
+      return;
+    }
     if (data.type === 'assistant_message') {
       appendBubble('assistant', 'Médico simulado', data.reply);
       renderEvaluation(data.evaluation);
+      addTimelineEvent({
+        agent: 'supervisor',
+        status: 'done',
+        title: 'Resposta final entregue',
+        message: 'A resposta consolidada foi enviada ao chat principal.',
+        timestamp: new Date().toISOString()
+      });
     } else if (data.type === 'error') {
       appendBubble('assistant', 'Sistema', data.error || 'Erro no processamento do turno.');
+      addTimelineEvent({
+        agent: 'system',
+        status: 'error',
+        title: 'Falha no turno',
+        message: data.error || 'Ocorreu um erro durante o processamento.',
+        timestamp: new Date().toISOString()
+      });
     }
   };
 

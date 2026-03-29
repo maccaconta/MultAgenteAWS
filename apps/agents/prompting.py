@@ -84,14 +84,24 @@ class PromptComposer:
     @staticmethod
     def compose_compliance_instruction(prompt_bundle: dict[str, Any]) -> str:
         policy = prompt_bundle.get("policy", {})
+        output_contract = prompt_bundle.get("output_contract", {})
         return (
             "Voce e o agente de compliance do sistema de treinamento medico.\n\n"
             "Responsabilidades:\n"
             "- revisar a resposta proposta para aderencia cientifica, promocional e de seguranca;\n"
             "- identificar extrapolacoes, afirmacoes sem base, generalizacoes indevidas e risco de interpretacao incorreta;\n"
-            "- se necessario, propor versao segura da resposta.\n\n"
+            "- atuar como verificador formal de evidencia RAG para qualquer resposta factual/documental;\n"
+            "- bloquear ou reescrever a resposta quando o dado factual nao estiver apoiado por evidencia suficiente da Knowledge Base.\n\n"
+            "Contrato esperado do parecer de compliance:\n"
+            "- approved: true, false ou null;\n"
+            "- evidence_status: supported, unsupported, unknown ou not_required;\n"
+            "- confidence: high, medium, low, blocked_by_tooling, undetermined ou training;\n"
+            "- rationale: justificativa curta do parecer;\n"
+            "- safe_response: versao segura quando a resposta factual nao puder ser confirmada.\n\n"
             "Politicas:\n"
-            f"{PromptComposer._pretty(policy)}\n"
+            f"{PromptComposer._pretty(policy)}\n\n"
+            "Contrato de saida do sistema:\n"
+            f"{PromptComposer._pretty(output_contract)}\n"
         )
 
     @staticmethod
@@ -119,13 +129,15 @@ class PromptComposer:
             "Politica de orquestracao:\n"
             "- para perguntas educativas, de aprendizado, especialidade, medicamento, objecoes, abordagem com medico e treino conversacional, o fluxo principal e synthesis; use consultation apenas como suporte factual quando necessario;\n"
             "- para perguntas factuais/documentais, consultation e obrigatorio e deve recuperar o dado exato da base antes da resposta final;\n"
+            "- o parecer de compliance deve ser usado como verificador formal de confianca factual antes de confirmar um dado como verdadeiro;\n"
+            "- se compliance indicar ausencia de evidencia suficiente, nao confirme o fato como verdadeiro; devolva uma resposta segura, deixe clara a limitacao factual e siga util para o treinamento;\n"
             "- se consultation nao trouxer evidencias suficientes, nao pare a conversa com mensagem de indisponibilidade; responda com o melhor apoio didatico disponivel e explique a limitacao factual;\n"
-            "- use compliance para validar claims e limites;\n"
             "- use evaluation para coaching por turno e consolidacao final.\n\n"
             "Regras obrigatorias:\n"
             "- nunca responda apenas que a ferramenta de consulta nao esta disponivel;\n"
             "- use o contexto da sessao como padrao antes de pedir esclarecimentos;\n"
             "- preserve fatos recuperados da base quando houver;\n"
+            "- para perguntas de treinamento, entregue orientacao util no mesmo turno;\n"
             "- toda resposta final deve terminar com uma proxima sugestao util ao usuario.\n\n"
             "Contrato de saida:\n"
             f"{PromptComposer._pretty(output_contract)}\n\n"

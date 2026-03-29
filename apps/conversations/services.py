@@ -48,7 +48,12 @@ class ConversationSessionService:
         specialty = cleaned_data.get("specialty") or blueprint.specialty
 
         manifest = AppConfig.load_manifest().get("blueprints", {})
-        bedrock_team = manifest.get(blueprint.slug) or manifest.get("default") or {}
+        bedrock_team = manifest.get(blueprint.slug) or manifest.get("default")
+
+        if not bedrock_team:
+            raise RuntimeError(
+                f"Nao foi possivel resolver o binding Bedrock para o blueprint '{blueprint.slug}'."
+            )
 
         session = ConversationSession.objects.create(
             user=user,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timezone
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
@@ -11,6 +12,10 @@ from apps.conversations.services import AgentResult, ConversationTurnService
 from apps.evaluations.services import EvaluationSnapshotService
 
 logger = logging.getLogger(__name__)
+
+
+def _iso_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 class SimulationConsumer(AsyncJsonWebsocketConsumer):
@@ -33,6 +38,18 @@ class SimulationConsumer(AsyncJsonWebsocketConsumer):
         if hasattr(self, "group_name"):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
+    async def _send_timeline_event(self, *, agent: str, title: str, message: str, status: str = "done"):
+        await self.send_json(
+            {
+                "type": "timeline_event",
+                "agent": agent,
+                "title": title,
+                "message": message,
+                "status": status,
+                "timestamp": _iso_now(),
+            }
+        )
+
     async def receive_json(self, content, **kwargs):
         try:
             logger.info("WS receive session_id=%s payload=%s", self.session_id, content)
@@ -44,7 +61,7 @@ class SimulationConsumer(AsyncJsonWebsocketConsumer):
 
             session = await self._get_session()
 
-            user_turn = await database_sync_to_async(ConversationTurnService.append_turn)(
+            await database_sync_to_async(ConversationTurnService.append_turn)(
                 session,
                 role="user",
                 content=message,
@@ -52,7 +69,24 @@ class SimulationConsumer(AsyncJsonWebsocketConsumer):
                 input_payload=content,
             )
 
+            await self._send_timeline_event(
+                agent="supervisor",
+                title="Orquestração iniciada",
+                message="O supervisor recebeu a mensagem do usuário e iniciou a preparação do turno.",
+                status="running",
+            )
+
             result = await database_sync_to_async(self.orchestrator.process_turn)(session, message)
+
+            for event in result.get("timeline", []):
+                await self._send_timeline_event(
+                    agent=event.get("agent", "system"),
+                    title=event.get("title", "Etapa confirmada"),
+                    message=event.get("message", "Sem detalhe adicional."),
+                    status=event.get("status", "done"),
+                )
+
+            evaluation_payload = result.get("evaluation") or {}
 
             doctor_turn = await database_sync_to_async(ConversationTurnService.append_turn)(
                 session,
@@ -81,7 +115,6 @@ class SimulationConsumer(AsyncJsonWebsocketConsumer):
                 ),
             )
 
-            evaluation_payload = result["evaluation"] or {}
             if evaluation_payload:
                 await database_sync_to_async(EvaluationSnapshotService.persist)(
                     session, doctor_turn.sequence, evaluation_payload
@@ -101,7 +134,23 @@ class SimulationConsumer(AsyncJsonWebsocketConsumer):
 
         except Exception as exc:
             logger.exception("WS receive failed session_id=%s error=%s", getattr(self, "session_id", None), exc)
-            await self.send_json({"type": "error", "error": str(exc)})
+
+            raw_error = str(exc)
+            if "Supervisor Bedrock nao configurado" in raw_error or "binding" in raw_error.lower():
+                safe_error = (
+                    "Nao foi possivel iniciar a orquestracao Bedrock desta sessao. "
+                    "Abra uma nova sessao ou revise o manifesto e os aliases configurados."
+                )
+            else:
+                safe_error = "Ocorreu um erro ao processar este turno. Tente novamente."
+
+            await self._send_timeline_event(
+                agent="supervisor",
+                title="Falha na orquestração",
+                message=safe_error,
+                status="error",
+            )
+            await self.send_json({"type": "error", "error": safe_error})
 
     @database_sync_to_async
     def _get_session(self) -> ConversationSession:

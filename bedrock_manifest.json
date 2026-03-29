@@ -3,12 +3,12 @@
     "default": {
       "supervisor": {
         "agent_id": "JO0SG5Z8EI",
-        "alias_id": "TSTALIASID"
+        "alias_id": "LB6TMVZIHT"
       },
       "collaborators": {
         "consultation": {
           "agent_id": "MLP8GVTSYX",
-          "alias_id": "Q7IB3UZ90R"
+          "alias_id": "OKCD2OFZBR"
         },
         "synthesis": {
           "agent_id": "WNPST1YIUL",
@@ -28,12 +28,12 @@
     "default-normas": {
       "supervisor": {
         "agent_id": "JO0SG5Z8EI",
-        "alias_id": "TSTALIASID"
+        "alias_id": "LB6TMVZIHT"
       },
       "collaborators": {
         "consultation": {
           "agent_id": "MLP8GVTSYX",
-          "alias_id": "Q7IB3UZ90R"
+          "alias_id": "OKCD2OFZBR"
         },
         "synthesis": {
           "agent_id": "WNPST1YIUL",

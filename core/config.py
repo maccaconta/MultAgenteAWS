@@ -44,29 +44,32 @@ class AppConfig:
     DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@example.com')
     SES_SOURCE_EMAIL = os.environ.get('SES_SOURCE_EMAIL', DEFAULT_FROM_EMAIL)
 
-    # Caminho para o manifesto dos agentes Bedrock criados pela aplicacao.
     BEDROCK_AGENT_TEAM_MANIFEST = os.environ.get(
         'BEDROCK_AGENT_TEAM_MANIFEST',
         str(VAR_DIR / 'bedrock_agent_team_manifest.json'),
     )
 
-    # @classmethod
-    # def load_manifest(cls) -> dict[str, Any]:
-    #     path = Path(cls.BEDROCK_AGENT_TEAM_MANIFEST)
-    #     if not path.exists():
-    #         return {'blueprints': {}}
-    #     return json.loads(path.read_text(encoding='utf-8'))
-    
+    @classmethod
+    def load_manifest(cls) -> dict[str, Any]:
+        candidate_paths = [
+            Path(cls.BEDROCK_AGENT_TEAM_MANIFEST),
+            cls.BASE_DIR / 'bedrock_manifest.json',
+            Path.cwd() / 'bedrock_manifest.json',
+            cls.VAR_DIR / 'bedrock_agent_team_manifest.json',
+        ]
 
-    @staticmethod
-    def load_manifest():
-        path = Path("bedrock_manifest.json")
-        if not path.exists():
-            return {}
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
+        for path in candidate_paths:
+            try:
+                if not path.exists():
+                    continue
+                payload = json.loads(path.read_text(encoding='utf-8'))
+                blueprints = payload.get('blueprints')
+                if isinstance(blueprints, dict) and blueprints:
+                    return payload
+            except Exception:
+                continue
 
-
+        return {'blueprints': {}}
 
     @classmethod
     def save_manifest(cls, payload: dict[str, Any]) -> None:
