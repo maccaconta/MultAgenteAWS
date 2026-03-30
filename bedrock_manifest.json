@@ -3,12 +3,12 @@
     "default": {
       "supervisor": {
         "agent_id": "JO0SG5Z8EI",
-        "alias_id": "LB6TMVZIHT"
+        "alias_id": "OOZ9ZRLQIW"
       },
       "collaborators": {
         "consultation": {
           "agent_id": "MLP8GVTSYX",
-          "alias_id": "OKCD2OFZBR"
+          "alias_id": "GTP5HLTHJF"
         },
         "synthesis": {
           "agent_id": "WNPST1YIUL",
@@ -23,17 +23,17 @@
           "alias_id": "SE4UGP8FTG"
         }
       },
-      "knowledge_base_id": "BJWEDBPNJH"
+      "knowledge_base_id": "FGFPEBFU3H"
     },
     "default-normas": {
       "supervisor": {
         "agent_id": "JO0SG5Z8EI",
-        "alias_id": "LB6TMVZIHT"
+        "alias_id": "OOZ9ZRLQIW"
       },
       "collaborators": {
         "consultation": {
           "agent_id": "MLP8GVTSYX",
-          "alias_id": "OKCD2OFZBR"
+          "alias_id": "GTP5HLTHJF"
         },
         "synthesis": {
           "agent_id": "WNPST1YIUL",
@@ -48,7 +48,7 @@
           "alias_id": "SE4UGP8FTG"
         }
       },
-      "knowledge_base_id": "BJWEDBPNJH"
+      "knowledge_base_id": "FGFPEBFU3H"
     }
   }
 }

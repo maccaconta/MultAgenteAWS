@@ -1,0 +1,16 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AmazonBedrockAgentMultiAgentsPolicyConsultaV4",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:GetAgentAlias",
+        "bedrock:InvokeAgent"
+      ],
+      "Resource": [
+        "arn:aws:bedrock:us-east-1:746443183845:agent-alias/MLP8GVTSYX/GTP5HLTHJF"
+      ]
+    }
+  ]
+}

@@ -22,7 +22,17 @@
       <div class="session-hero-value">{{ session.scenario.title }}</div>
     </div>
   </div>
-  <p class="hero-copy">Conduza a visita médica com o especialista simulado. A lateral destaca os eventos confirmados do pipeline com identificação visual clara do agente responsável e status do turno.</p>
+
+  <div class="hero-agents-row">
+    <div class="hero-agents-title">Agentes</div>
+    <div class="hero-agent-legend">
+      <span class="agent-chip"><span class="agent-chip-icon">⭐</span>Supervisor</span>
+      <span class="agent-chip"><span class="agent-chip-icon">🔍</span>Consulta</span>
+      <span class="agent-chip"><span class="agent-chip-icon">📝</span>Síntese</span>
+      <span class="agent-chip"><span class="agent-chip-icon">🛡️</span>Compliance</span>
+      <span class="agent-chip"><span class="agent-chip-icon">📊</span>Avaliação</span>
+    </div>
+  </div>
 </section>
 
 <style>
@@ -47,7 +57,28 @@
     font-weight: 700;
     line-height: 1.3;
   }
-  .hero-copy { margin-top: 14px; }
+
+  .hero-agents-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: center;
+    margin-top: 16px;
+  }
+  .hero-agents-title {
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .hero-agent-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
 
   .session-summary-card {
     background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
@@ -59,16 +90,25 @@
   }
 
   .chat-card {
-    min-height: 48vh;
-    max-height: 74vh;
+    min-height: 46vh;
+    max-height: 72vh;
     display: flex;
     flex-direction: column;
   }
   .chat-card .chat-stream {
     flex: 1;
-    min-height: 260px;
-    max-height: calc(74vh - 108px);
+    min-height: 240px;
+    max-height: calc(72vh - 108px);
     padding-right: 8px;
+  }
+  .bubble {
+    padding: 11px 13px;
+    border-radius: 16px;
+    line-height: 1.45;
+  }
+  .bubble.assistant.initial-training {
+    max-width: 100%;
+    background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.03));
   }
 
   .panel-title-row {
@@ -78,8 +118,7 @@
     gap: 12px;
     margin-bottom: 14px;
   }
-  .panel-title-row h3,
-  .panel-title-row h4 { margin: 0; }
+  .panel-title-row h3, .panel-title-row h4 { margin: 0; }
   .panel-kicker {
     color: var(--muted);
     font-size: 12px;
@@ -113,9 +152,7 @@
     border-radius: 22px;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
   }
-  .timeline-panel-header {
-    flex: 0 0 auto;
-  }
+  .timeline-panel-header { flex: 0 0 auto; }
   .timeline-intro {
     margin: 0;
     color: var(--muted);
@@ -155,16 +192,6 @@
     text-overflow: ellipsis;
   }
 
-  .agent-legend {
-    flex: 0 0 auto;
-    display: grid;
-    gap: 8px;
-  }
-  .agent-legend-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
   .agent-chip {
     display: inline-flex;
     align-items: center;
@@ -196,21 +223,14 @@
     padding-right: 6px;
     margin-right: -4px;
   }
-  .timeline-scroll::-webkit-scrollbar {
-    width: 8px;
-  }
+  .timeline-scroll::-webkit-scrollbar { width: 8px; }
   .timeline-scroll::-webkit-scrollbar-thumb {
     background: rgba(255,255,255,.12);
     border-radius: 999px;
   }
-  .timeline-scroll::-webkit-scrollbar-track {
-    background: transparent;
-  }
+  .timeline-scroll::-webkit-scrollbar-track { background: transparent; }
 
-  .timeline-feed {
-    display: grid;
-    gap: 12px;
-  }
+  .timeline-feed { display: grid; gap: 12px; }
 
   .timeline-item {
     position: relative;
@@ -230,9 +250,7 @@
   .timeline-item.error::before { background: rgba(232,107,122,.95); }
   .timeline-item.running::before { background: rgba(110,168,255,.95); }
 
-  .timeline-item-inner {
-    padding: 14px 14px 12px 16px;
-  }
+  .timeline-item-inner { padding: 14px 14px 12px 16px; }
 
   .timeline-item-head {
     display: grid;
@@ -267,14 +285,18 @@
     display: grid;
     gap: 4px;
   }
-  .timeline-agent-label {
-    font-size: 13px;
-    font-weight: 800;
-    line-height: 1.2;
+  .timeline-agent-label,
+  .timeline-item-title,
+  .timeline-summary-value {
     min-width: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .timeline-agent-label {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
   }
   .timeline-item-title {
     font-size: 11px;
@@ -283,10 +305,6 @@
     text-transform: uppercase;
     letter-spacing: .08em;
     line-height: 1.35;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .timeline-status {
@@ -346,6 +364,24 @@
     gap: 10px;
   }
 
+  .timeline-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .timeline-action-btn {
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.04);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 6px 9px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: none;
+  }
+
   .timeline-empty {
     padding: 16px;
     border-radius: 18px;
@@ -354,6 +390,61 @@
     font-size: 13px;
     line-height: 1.55;
     background: rgba(255,255,255,.02);
+  }
+
+  .overlay-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 10, 20, .62);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 60;
+    padding: 20px;
+  }
+  .overlay-backdrop.open {
+    display: flex;
+  }
+  .overlay-modal {
+    width: min(860px, 100%);
+    max-height: 78vh;
+    background: linear-gradient(180deg, rgba(16, 28, 54, .98), rgba(10, 20, 38, .98));
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 20px;
+    box-shadow: 0 30px 100px rgba(0,0,0,.42);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .overlay-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .overlay-title {
+    font-size: 14px;
+    font-weight: 800;
+  }
+  .overlay-body {
+    padding: 16px 18px;
+    overflow: auto;
+  }
+  .overlay-pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #dfe8ff;
+  }
+  .overlay-foot {
+    padding: 14px 18px 18px;
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid rgba(255,255,255,.06);
   }
 
   @keyframes pulseTimeline {
@@ -369,22 +460,17 @@
       max-height: none;
       min-height: 0;
     }
-    .timeline-scroll {
-      max-height: 520px;
-    }
+    .timeline-scroll { max-height: 520px; }
   }
   @media (max-width: 980px) {
     .session-hero-card { grid-template-columns: 1fr 1fr; }
     .timeline-summary { grid-template-columns: 1fr; }
+    .hero-agents-row { grid-template-columns: 1fr; }
   }
   @media (max-width: 720px) {
     .session-hero-card { grid-template-columns: 1fr; }
-    .timeline-item-head {
-      grid-template-columns: 1fr;
-    }
-    .timeline-status {
-      justify-self: start;
-    }
+    .timeline-item-head { grid-template-columns: 1fr; }
+    .timeline-status { justify-self: start; }
     .timeline-item-title,
     .timeline-agent-label,
     .timeline-summary-value {
@@ -441,9 +527,11 @@
           {{ turn.content }}
         </div>
       {% empty %}
-        <div class="bubble assistant">
+        <div class="bubble assistant initial-training">
           <div class="message-meta">Sistema</div>
-          A sessão está pronta. Faça sua primeira abordagem como propagandista.
+          Treinamento iniciado. Use este espaço para praticar abordagem com médicos reais.<br><br>
+          Você pode treinar de três formas: 1) pedir orientação de como abordar uma especialidade ou tema; 2) pedir simulação de objeções e respostas; 3) fazer perguntas factuais quando precisar validar um dado documental da base.<br><br>
+          Para começar, experimente algo como: “Como abordar um médico sobre TDAH?”, “Simule uma objeção sobre adesão ao tratamento” ou “Consulte na base para que serve Somalgin Cardio”.
         </div>
       {% endfor %}
     </div>
@@ -471,18 +559,6 @@
       </div>
     </div>
 
-    <div class="agent-legend">
-      <div class="agent-legend-row">
-        <span class="agent-chip"><span class="agent-chip-icon">⭐</span>Supervisor</span>
-        <span class="agent-chip"><span class="agent-chip-icon">🔍</span>Consulta</span>
-        <span class="agent-chip"><span class="agent-chip-icon">📝</span>Síntese</span>
-      </div>
-      <div class="agent-legend-row">
-        <span class="agent-chip"><span class="agent-chip-icon">🛡️</span>Compliance</span>
-        <span class="agent-chip"><span class="agent-chip-icon">📊</span>Avaliação</span>
-      </div>
-    </div>
-
     <div class="timeline-scroll" id="timeline-scroll">
       <div class="timeline-feed" id="timeline-feed">
         <div class="timeline-empty">Nenhum evento deste turno ainda. Quando você enviar a próxima mensagem, a linha do tempo mostrará as etapas confirmadas pela aplicação com destaque visual do agente responsável.</div>
@@ -490,6 +566,20 @@
     </div>
   </aside>
 </section>
+
+<div class="overlay-backdrop" id="debug-modal">
+  <div class="overlay-modal">
+    <div class="overlay-head">
+      <div class="overlay-title" id="debug-modal-title">Detalhe do evento</div>
+    </div>
+    <div class="overlay-body">
+      <pre class="overlay-pre" id="debug-modal-content">{}</pre>
+    </div>
+    <div class="overlay-foot">
+      <button class="btn btn-secondary" id="debug-modal-close">OK</button>
+    </div>
+  </div>
+</div>
 {% endblock %}
 {% block extra_head %}
 <script>
@@ -504,6 +594,10 @@ document.addEventListener('DOMContentLoaded', function () {
   const timelineScroll = document.getElementById('timeline-scroll');
   const timelineLastAgent = document.getElementById('timeline-last-agent');
   const timelineTurnStatus = document.getElementById('timeline-turn-status');
+  const debugModal = document.getElementById('debug-modal');
+  const debugModalTitle = document.getElementById('debug-modal-title');
+  const debugModalContent = document.getElementById('debug-modal-content');
+  const debugModalClose = document.getElementById('debug-modal-close');
 
   const AGENTS = {
     supervisor: { label: 'Supervisor', icon: '⭐', color: '#E74C3C' },
@@ -529,6 +623,29 @@ document.addEventListener('DOMContentLoaded', function () {
       return 'Atualização recente';
     }
   }
+
+  function prettyJson(value) {
+    try {
+      return JSON.stringify(value ?? {}, null, 2);
+    } catch (e) {
+      return String(value);
+    }
+  }
+
+  function openDebugModal(title, payload) {
+    debugModalTitle.textContent = title;
+    debugModalContent.textContent = prettyJson(payload);
+    debugModal.classList.add('open');
+  }
+
+  function closeDebugModal() {
+    debugModal.classList.remove('open');
+  }
+
+  debugModalClose.addEventListener('click', closeDebugModal);
+  debugModal.addEventListener('click', function (event) {
+    if (event.target === debugModal) closeDebugModal();
+  });
 
   function appendBubble(role, speaker, text) {
     const bubble = document.createElement('div');
@@ -578,6 +695,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const item = document.createElement('div');
     item.className = `timeline-item ${payload.status || ''}`;
+
+    const showInput = payload.input_payload !== undefined && payload.input_payload !== null;
+    const showOutput = payload.output_payload !== undefined && payload.output_payload !== null;
+    const actions = [];
+    if (showInput) actions.push('<button class="timeline-action-btn" data-kind="input">Entrada</button>');
+    if (showOutput) actions.push('<button class="timeline-action-btn" data-kind="output">Saída</button>');
+
     item.innerHTML = `
       <div class="timeline-item-inner">
         <div class="timeline-item-head">
@@ -594,12 +718,26 @@ document.addEventListener('DOMContentLoaded', function () {
           </span>
         </div>
         <div class="timeline-item-message">${payload.message || 'Sem detalhe adicional.'}</div>
+        ${actions.length ? `<div class="timeline-actions">${actions.join('')}</div>` : ''}
         <div class="timeline-item-time">
           <span>${formatTimestamp(payload.timestamp)}</span>
           <span>${meta.label}</span>
         </div>
       </div>
     `;
+
+    if (showInput || showOutput) {
+      item.querySelectorAll('.timeline-action-btn').forEach((btn) => {
+        btn.addEventListener('click', function () {
+          if (btn.dataset.kind === 'input') {
+            openDebugModal(`${meta.label} · Entrada`, payload.input_payload);
+          } else {
+            openDebugModal(`${meta.label} · Saída`, payload.output_payload);
+          }
+        });
+      });
+    }
+
     timelineFeed.prepend(item);
     timelineScroll.scrollTop = 0;
 
@@ -616,14 +754,9 @@ document.addEventListener('DOMContentLoaded', function () {
       status: 'done',
       title: 'Mensagem recebida',
       message: `Turno iniciado com a entrada do usuário: "${userMessage.substring(0, 140)}${userMessage.length > 140 ? '…' : ''}"`,
-      timestamp: new Date().toISOString()
-    });
-    addTimelineEvent({
-      agent: 'supervisor',
-      status: 'running',
-      title: 'Orquestração iniciada',
-      message: 'Supervisor recebeu a mensagem do usuário e iniciou o preparo do turno.',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      input_payload: { message: userMessage },
+      output_payload: null
     });
   }
 
@@ -653,13 +786,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (data.type === 'assistant_message') {
       appendBubble('assistant', 'Médico simulado', data.reply);
       renderEvaluation(data.evaluation);
-      addTimelineEvent({
-        agent: 'supervisor',
-        status: 'done',
-        title: 'Resposta final entregue',
-        message: 'A resposta consolidada foi enviada ao chat principal.',
-        timestamp: new Date().toISOString()
-      });
     } else if (data.type === 'error') {
       appendBubble('assistant', 'Sistema', data.error || 'Erro no processamento do turno.');
       addTimelineEvent({
@@ -667,7 +793,9 @@ document.addEventListener('DOMContentLoaded', function () {
         status: 'error',
         title: 'Falha no turno',
         message: data.error || 'Ocorreu um erro durante o processamento.',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        input_payload: null,
+        output_payload: { error: data.error || 'Ocorreu um erro durante o processamento.' }
       });
     }
   };
