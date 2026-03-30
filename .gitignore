@@ -41,3 +41,5 @@ Thumbs.db
 # Secrets / local config
 secrets.yamlcerts/corp-root.crt
 certs/corp-root.cer
+
+.acesso.txt
