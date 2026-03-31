@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Treinamento de Propagandistas{% endblock %}
+{% block session_drawer %}
+<form method="post" action="{% url 'launch-simulation' %}" id="launch-form-drawer">
+  {% csrf_token %}
+  <div class="sr-only-field" aria-hidden="true">
+    {{ launch_form.blueprint }}
+  </div>
+
+  <div class="field">
+    <label for="id_persona">Persona médica</label>
+    {{ launch_form.persona }}
+    <div class="help">Perfil do médico que conduzirá a conversa simulada.</div>
+  </div>
+
+  <div class="field">
+    <label for="id_scenario">Cenário clínico</label>
+    {{ launch_form.scenario }}
+    <div class="help">Contexto principal da visita e da interação.</div>
+  </div>
+
+  <div class="field">
+    <label for="id_specialty">Especialidade</label>
+    {{ launch_form.specialty }}
+    <div class="help">Ajusta vocabulário, profundidade e tipo de objeção esperado.</div>
+  </div>
+
+  <button type="submit">Iniciar sessão</button>
+</form>
+{% endblock %}
+
+{% block content %}
+<section class="hero dashboard-hero">
+  <span class="pill">Laboratório de simulação médica</span>
+  <h1>Prepare um treino clínico com foco em abordagem, objeções e conversa com médicos reais.</h1>
+  <p>Escolha a composição ideal da sessão e inicie uma prática guiada com médico simulado, avaliação automática e suporte factual quando necessário.</p>
+
+  <div class="dashboard-kpis">
+    <div class="kpi-card">
+      <span class="kpi-label">Personas</span>
+      <strong>{{ personas|length }}</strong>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Cenários</span>
+      <strong>{{ scenarios|length }}</strong>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Especialidades</span>
+      <strong>{{ specialties|length }}</strong>
+    </div>
+  </div>
+</section>
+
+<style>
+  .dashboard-hero {
+    max-width: 920px;
+    margin: 0 auto 12px;
+  }
+
+  .dashboard-hero p {
+    max-width: 760px;
+    margin: 0 auto;
+    color: var(--muted);
+    line-height: 1.62;
+  }
+
+  .dashboard-kpis {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .kpi-card {
+    padding: 18px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+    display: grid;
+    gap: 8px;
+    text-align: center;
+    box-shadow: 0 12px 26px rgba(0,0,0,.12);
+  }
+
+  .kpi-card strong {
+    font-size: clamp(30px, 2.6vw, 38px);
+    line-height: 1;
+    color: #fff1d8;
+  }
+
+  .kpi-label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .10em;
+  }
+
+  .dashboard-main {
+    max-width: 1080px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .primary-panel h2,
+  .secondary-panel h3 {
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .primary-panel p.intro-copy,
+  .secondary-panel p {
+    color: var(--muted);
+    line-height: 1.62;
+    margin-top: 0;
+    text-align: center;
+  }
+
+  .action-grid {
+    display: grid;
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .action-item {
+    padding: 16px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.025));
+    border: 1px solid rgba(255,255,255,.07);
+  }
+
+  .action-item strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #fff2de;
+    font-size: 15px;
+  }
+
+  .action-item span {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .cta-strip {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.06);
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  @media (max-width: 1080px) {
+    .dashboard-main {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 980px) {
+    .dashboard-kpis {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<section class="dashboard-main">
+  <div class="card primary-panel">
+    <div class="pill">Experiência de treino</div>
+    <h2>Uma interface mais limpa para iniciar e evoluir cada sessão</h2>
+    <p class="intro-copy">A abertura da nova sessão foi deslocada para a lateral, reduzindo repetição visual na home e deixando a área principal mais agradável para leitura rápida.</p>
+
+    <div class="action-grid">
+      <div class="action-item">
+        <strong>Acesso lateral guiado</strong>
+        <span>Ao passar o mouse na borda esquerda, o ícone revela o painel para montar a sessão com rapidez.</span>
+      </div>
+      <div class="action-item">
+        <strong>Menos ruído na página</strong>
+        <span>O foco da home fica em orientação clara, visão executiva e preparação do treino.</span>
+      </div>
+      <div class="action-item">
+        <strong>Preparação mais eficiente</strong>
+        <span>Use a sessão para testar abordagem, objeções e adaptação do discurso técnico-comercial.</span>
+      </div>
+    </div>
+
+    <div class="cta-strip">Passe o mouse no ícone lateral esquerdo para abrir “Nova sessão de treinamento”.</div>
+  </div>
+
+  <aside class="card secondary-panel">
+    <div class="pill">Aplicação prática</div>
+    <h3>Como aproveitar melhor a experiência</h3>
+    <div class="action-grid">
+      <div class="action-item">
+        <strong>Antes da visita</strong>
+        <span>Teste a melhor linha de abertura e a mensagem central da conversa com o médico.</span>
+      </div>
+      <div class="action-item">
+        <strong>Durante preparação de campanha</strong>
+        <span>Varie cenário, persona e especialidade para ajustar a abordagem a diferentes perfis médicos.</span>
+      </div>
+      <div class="action-item">
+        <strong>Para refinamento técnico</strong>
+        <span>Use o fluxo factual quando precisar validar informação documental com segurança.</span>
+      </div>
+    </div>
+  </aside>
+</section>
+{% endblock %}
+
+{% block extra_head %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const blueprintField = document.getElementById('id_blueprint');
+  if (!blueprintField) return;
+
+  if (!blueprintField.value) {
+    const options = Array.from(blueprintField.options || []);
+    const fallback = options.find(opt => opt.value);
+    if (fallback) {
+      blueprintField.value = fallback.value;
+    }
+  }
+});
+</script>
+{% endblock %}

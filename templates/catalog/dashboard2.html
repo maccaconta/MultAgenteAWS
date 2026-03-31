@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Treinamento de Propagandistas{% endblock %}
+{% block content %}
+<section class="hero dashboard-hero">
+  <span class="pill">Laboratório de simulação médica</span>
+  <h1>Prepare um treino clínico com foco em abordagem, objeções e conversa com médicos reais.</h1>
+  <p>Escolha a composição da sessão e inicie um treino guiado com médico simulado, avaliação automática e suporte factual quando a base de conhecimento for necessária.</p>
+
+  <div class="dashboard-kpis">
+    <div class="kpi-card">
+      <span class="kpi-label">Personas</span>
+      <strong>{{ personas|length }}</strong>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Cenários</span>
+      <strong>{{ scenarios|length }}</strong>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Especialidades</span>
+      <strong>{{ specialties|length }}</strong>
+    </div>
+  </div>
+</section>
+
+<style>
+  .dashboard-hero {
+    max-width: 1080px;
+    margin: 0 auto 10px;
+  }
+
+  .dashboard-kpis {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .kpi-card {
+    padding: 20px 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    display: grid;
+    gap: 10px;
+    text-align: center;
+    box-shadow: 0 16px 34px rgba(0,0,0,.16);
+  }
+
+  .kpi-card strong {
+    font-size: clamp(32px, 3vw, 42px);
+    line-height: 1;
+    color: #fff1d8;
+  }
+
+  .kpi-label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .10em;
+  }
+
+  .launch-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  .launch-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 22px;
+    align-items: start;
+  }
+
+  .launch-card {
+    min-height: 100%;
+  }
+
+  .launch-card h2 {
+    margin-bottom: 10px;
+    font-size: clamp(26px, 2.4vw, 38px);
+    line-height: 1.08;
+  }
+
+  .launch-card .intro-copy {
+    max-width: 860px;
+    margin-top: 0;
+    margin-bottom: 22px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+
+  .field-card {
+    padding: 16px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.025));
+    border: 1px solid rgba(255,255,255,.07);
+  }
+
+  .field-card label {
+    margin-bottom: 10px;
+  }
+
+  .field-card .help {
+    margin-top: 10px;
+  }
+
+  .launch-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .launch-actions .microcopy {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .commercial-panel {
+    display: grid;
+    gap: 16px;
+  }
+
+  .commercial-card {
+    padding: 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+    box-shadow: 0 16px 34px rgba(0,0,0,.16);
+  }
+
+  .commercial-card h3 {
+    margin-bottom: 10px;
+    font-size: 19px;
+  }
+
+  .commercial-card p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.65;
+    font-size: 14px;
+  }
+
+  .commercial-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .commercial-item {
+    padding: 14px 14px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.035);
+    border: 1px solid rgba(255,255,255,.06);
+  }
+
+  .commercial-item strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #fff1d8;
+    font-size: 15px;
+  }
+
+  .commercial-item span {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  @media (max-width: 1100px) {
+    .launch-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 980px) {
+    .dashboard-kpis,
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<section class="launch-shell">
+  <div class="launch-layout">
+    <div class="card launch-card">
+      <div class="pill">Nova sessão de treinamento</div>
+      <h2>Monte sua próxima simulação com precisão comercial</h2>
+      <p class="intro-copy">Defina a combinação ideal de persona médica, cenário clínico e especialidade para iniciar uma sessão mais realista, persuasiva e aderente à sua rotina de visita.</p>
+
+      <form method="post" action="{% url 'launch-simulation' %}" id="launch-form">
+        {% csrf_token %}
+        <div class="sr-only-field" aria-hidden="true">
+          {{ launch_form.blueprint }}
+        </div>
+
+        <div class="form-grid">
+          <div class="field field-card">
+            <label for="id_persona">Persona médica</label>
+            {{ launch_form.persona }}
+            <div class="help">Escolha o perfil de médico que conduzirá a conversa simulada.</div>
+          </div>
+
+          <div class="field field-card">
+            <label for="id_scenario">Cenário clínico</label>
+            {{ launch_form.scenario }}
+            <div class="help">Selecione o contexto da visita e a tensão principal da interação.</div>
+          </div>
+
+          <div class="field field-card">
+            <label for="id_specialty">Especialidade</label>
+            {{ launch_form.specialty }}
+            <div class="help">Ajuste a profundidade técnica, o vocabulário e o tipo de objeção esperado.</div>
+          </div>
+        </div>
+
+        <div class="launch-actions">
+          <button type="submit">Iniciar sessão</button>
+          <span class="microcopy">A configuração interna da aplicação continua preservada sem aparecer para o usuário.</span>
+        </div>
+      </form>
+    </div>
+
+    <aside class="commercial-panel">
+      <div class="commercial-card">
+        <h3>Pronto para treinar com mais impacto</h3>
+        <p>Use este ambiente para preparar visitas melhores, praticar respostas mais convincentes e elevar a qualidade do discurso técnico-comercial antes do contato real com o médico.</p>
+      </div>
+
+      <div class="commercial-card">
+        <h3>Aplicação na prática</h3>
+        <div class="commercial-list">
+          <div class="commercial-item">
+            <strong>Abordagem orientada</strong>
+            <span>Estruture a abertura da visita e a progressão da conversa com mais clareza.</span>
+          </div>
+          <div class="commercial-item">
+            <strong>Objeções e contorno</strong>
+            <span>Treine respostas mais objetivas para cenários de resistência clínica e comercial.</span>
+          </div>
+          <div class="commercial-item">
+            <strong>Profundidade técnica</strong>
+            <span>Adapte a argumentação ao perfil médico e ao nível esperado de detalhamento.</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}
+{% block extra_head %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const blueprintField = document.getElementById('id_blueprint');
+  if (!blueprintField) return;
+
+  if (!blueprintField.value) {
+    const options = Array.from(blueprintField.options || []);
+    const fallback = options.find(opt => opt.value);
+    if (fallback) {
+      blueprintField.value = fallback.value;
+    }
+  }
+});
+</script>
+{% endblock %}

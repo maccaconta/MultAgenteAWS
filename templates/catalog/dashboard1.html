@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Treinamento de Propagandistas{% endblock %}
+{% block content %}
+<section class="hero">
+  <span class="pill">Laboratório de simulação médica</span>
+  <h1>Prepare um treino clínico com foco em abordagem, objeções e conversa com médicos reais.</h1>
+  <p>Escolha a composição da sessão e inicie um treino guiado com médico simulado, avaliação automática e suporte factual quando a base de conhecimento for necessária.</p>
+  <div class="dashboard-kpis">
+    <div class="kpi-card"><span class="kpi-label">Blueprints ativos</span><strong>{{ blueprints|length }}</strong></div>
+    <div class="kpi-card"><span class="kpi-label">Personas</span><strong>{{ personas|length }}</strong></div>
+    <div class="kpi-card"><span class="kpi-label">Cenários</span><strong>{{ scenarios|length }}</strong></div>
+    <div class="kpi-card"><span class="kpi-label">Especialidades</span><strong>{{ specialties|length }}</strong></div>
+  </div>
+</section>
+
+<style>
+  .dashboard-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 20px;
+  }
+  .kpi-card {
+    padding: 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+    display: grid;
+    gap: 8px;
+  }
+  .kpi-card strong { font-size: 30px; }
+  .kpi-label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .launch-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+    gap: 20px;
+    align-items: start;
+  }
+  .launch-card h2 { margin-bottom: 10px; }
+  .launch-card p { margin-top: 0; }
+  .internal-blueprint {
+    padding: 14px;
+    border-radius: 16px;
+    border: 1px dashed rgba(255,255,255,.14);
+    background: rgba(255,255,255,.02);
+    margin-bottom: 16px;
+  }
+  .internal-blueprint strong { display:block; margin-bottom: 4px; }
+  .catalog-column { display: grid; gap: 18px; }
+  @media (max-width: 1040px) {
+    .dashboard-kpis, .launch-layout { grid-template-columns: 1fr; }
+  }
+</style>
+
+<section class="launch-layout">
+  <div class="card launch-card">
+    <h2>Nova sessão de treinamento</h2>
+    <p class="muted">A aplicação usa um blueprint interno para orquestrar política, contrato de saída e rubrica. Para a experiência do usuário, o ajuste principal fica em persona, cenário e especialidade.</p>
+
+    <div class="internal-blueprint">
+      <strong>Blueprint da aplicação</strong>
+      <span class="muted">Mantido como configuração interna da sessão. Caso precise alterar, use o catálogo administrativo.</span>
+    </div>
+
+    <form method="post" action="{% url 'launch-simulation' %}" id="launch-form">
+      {% csrf_token %}
+      <div class="sr-only-field" aria-hidden="true">
+        {{ launch_form.blueprint }}
+      </div>
+
+      <div class="field">
+        <label for="id_persona">Persona médica</label>
+        {{ launch_form.persona }}
+        <div class="help">Define o perfil do médico que será simulado na conversa.</div>
+      </div>
+      <div class="field">
+        <label for="id_scenario">Cenário clínico</label>
+        {{ launch_form.scenario }}
+        <div class="help">Contexto clínico, objetivo da visita e tensão principal do treino.</div>
+      </div>
+      <div class="field">
+        <label for="id_specialty">Especialidade</label>
+        {{ launch_form.specialty }}
+        <div class="help">Ajusta profundidade, vocabulário e tipo de objeções esperadas.</div>
+      </div>
+      <button type="submit">Iniciar sessão</button>
+    </form>
+  </div>
+
+  <div class="catalog-column">
+    <div class="card">
+      <h3>O que a experiência já suporta</h3>
+      <div class="list">
+        <div class="list-item">Treino orientado com médico simulado em tempo real.</div>
+        <div class="list-item">Persistência de sessões, turns e agent runs.</div>
+        <div class="list-item">Avaliação automática com score global e dimensões.</div>
+        <div class="list-item">Apoio factual quando a Knowledge Base precisa ser consultada.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Catálogo ativo</h3>
+      <div class="list">
+        {% for blueprint in blueprints %}
+          <div class="list-item">
+            <strong>{{ blueprint.title }}</strong><br>
+            <span class="muted">Persona: {{ blueprint.persona.title }} · Cenário: {{ blueprint.scenario.title }} · Especialidade: {{ blueprint.specialty.title }}</span>
+          </div>
+        {% empty %}
+          <div class="list-item">Nenhum blueprint ativo encontrado.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_head %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const blueprintField = document.getElementById('id_blueprint');
+  if (!blueprintField) return;
+
+  if (!blueprintField.value) {
+    const options = Array.from(blueprintField.options || []);
+    const preferred = options.find(opt => /default/i.test(opt.textContent) || /default/i.test(opt.value));
+    const fallback = options.find(opt => opt.value);
+    const selected = preferred || fallback;
+    if (selected) {
+      blueprintField.value = selected.value;
+    }
+  }
+});
+</script>
+{% endblock %}

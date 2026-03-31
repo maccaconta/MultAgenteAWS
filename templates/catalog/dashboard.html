@@ -1,125 +1,144 @@
 {% extends "base.html" %}
 {% block title %}Dashboard | Treinamento de Propagandistas{% endblock %}
+
+{% block session_drawer %}
+<form method="post" action="{% url 'launch-simulation' %}" id="launch-form-drawer">
+  {% csrf_token %}
+  <div class="sr-only-field" aria-hidden="true">
+    {{ launch_form.blueprint }}
+  </div>
+
+  <div class="field">
+    <label for="id_persona">Persona médica</label>
+    {{ launch_form.persona }}
+    <div class="help">Perfil do médico que conduzirá a conversa simulada.</div>
+  </div>
+
+  <div class="field">
+    <label for="id_scenario">Cenário clínico</label>
+    {{ launch_form.scenario }}
+    <div class="help">Contexto da visita e da interação simulada.</div>
+  </div>
+
+  <div class="field">
+    <label for="id_specialty">Especialidade</label>
+    {{ launch_form.specialty }}
+    <div class="help">Ajusta vocabulário, profundidade e tipo de objeção esperado.</div>
+  </div>
+
+  <button type="submit">Iniciar sessão</button>
+</form>
+{% endblock %}
+
+{% block info_panel %}
+<div class="card">
+  <div class="pill">Fluxo principal</div>
+  <h2>Como a experiência foi organizada</h2>
+  <p class="muted" style="text-align:center; line-height:1.62; margin-top:0;">
+    A configuração da conversa foi deslocada para o menu lateral. A área principal agora resume o papel do Bedrock e o que o protótipo já entrega no treinamento.
+  </p>
+  <div style="display:grid; gap:14px; margin-top:16px;">
+    <div class="experience-item">
+      <strong>Configuração lateral</strong>
+      <span>Abra o menu hamburger para definir persona, cenário e especialidade sem poluir a home.</span>
+    </div>
+    <div class="experience-item">
+      <strong>Leitura mais rápida</strong>
+      <span>A tela principal concentra visão geral, proposta de valor e acesso a detalhes sob demanda.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="pill">Aplicação do protótipo</div>
+  <h3>Como essa ferramenta pode ser usada</h3>
+  <div style="display:grid; gap:14px; margin-top:16px;">
+    <div class="experience-item">
+      <strong>Preparação de visita</strong>
+      <span>Teste abertura de conversa, mensagem central e possíveis objeções antes do encontro com o médico.</span>
+    </div>
+    <div class="experience-item">
+      <strong>Treino orientado</strong>
+      <span>Adapte a prática ao perfil médico, ao cenário clínico e ao nível de profundidade técnica desejado.</span>
+    </div>
+    <div class="experience-item">
+      <strong>Validação factual</strong>
+      <span>Acione apoio documental quando a conversa exigir confirmação mais precisa.</span>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
 {% block content %}
-<section class="hero">
-  <span class="pill">Laboratório de simulação médica</span>
-  <h1>Prepare um treino clínico com foco em abordagem, objeções e conversa com médicos reais.</h1>
-  <p>Escolha a composição da sessão e inicie um treino guiado com médico simulado, avaliação automática e suporte factual quando a base de conhecimento for necessária.</p>
+<section class="hero dashboard-hero">
+  <span class="pill">Treinamento de propagandistas</span>
+  <h2 style="max-width:820px; margin:10px auto;">Prepare uma sessão de prática com mais foco e menos ruído visual.</h2>
+  <p style="max-width:760px; margin:0 auto; color:var(--muted); line-height:1.62;">
+    Configure a conversa no menu lateral e use a tela principal para entender rapidamente a proposta do protótipo e iniciar o próximo treino.
+  </p>
+
   <div class="dashboard-kpis">
-    <div class="kpi-card"><span class="kpi-label">Blueprints ativos</span><strong>{{ blueprints|length }}</strong></div>
-    <div class="kpi-card"><span class="kpi-label">Personas</span><strong>{{ personas|length }}</strong></div>
-    <div class="kpi-card"><span class="kpi-label">Cenários</span><strong>{{ scenarios|length }}</strong></div>
-    <div class="kpi-card"><span class="kpi-label">Especialidades</span><strong>{{ specialties|length }}</strong></div>
+    <div class="kpi-card">
+      <span class="kpi-label">Personas</span>
+      <strong>{{ personas|length }}</strong>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Cenários</span>
+      <strong>{{ scenarios|length }}</strong>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Especialidades</span>
+      <strong>{{ specialties|length }}</strong>
+    </div>
   </div>
 </section>
 
 <style>
+  .dashboard-hero {
+    max-width: 920px;
+    margin: 0 auto 12px;
+  }
+
   .dashboard-kpis {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
     margin-top: 20px;
   }
+
   .kpi-card {
-    padding: 18px;
-    border-radius: 18px;
-    border: 1px solid rgba(255,255,255,.08);
-    background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+    padding: 18px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(124, 77, 255, .14);
+    background: linear-gradient(180deg, rgba(16, 23, 52, .72), rgba(10, 17, 36, .82));
     display: grid;
     gap: 8px;
+    text-align: center;
+    box-shadow: 0 12px 26px rgba(0,0,0,.12);
   }
-  .kpi-card strong { font-size: 30px; }
+
+  .kpi-card strong {
+    font-size: clamp(30px, 2.6vw, 38px);
+    line-height: 1;
+    color: #f3f6ff;
+  }
+
   .kpi-label {
     color: var(--muted);
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: .08em;
+    letter-spacing: .10em;
   }
-  .launch-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
-    gap: 20px;
-    align-items: start;
-  }
-  .launch-card h2 { margin-bottom: 10px; }
-  .launch-card p { margin-top: 0; }
-  .internal-blueprint {
-    padding: 14px;
-    border-radius: 16px;
-    border: 1px dashed rgba(255,255,255,.14);
-    background: rgba(255,255,255,.02);
-    margin-bottom: 16px;
-  }
-  .internal-blueprint strong { display:block; margin-bottom: 4px; }
-  .catalog-column { display: grid; gap: 18px; }
-  @media (max-width: 1040px) {
-    .dashboard-kpis, .launch-layout { grid-template-columns: 1fr; }
+
+  @media (max-width: 980px) {
+    .dashboard-kpis {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
-
-<section class="launch-layout">
-  <div class="card launch-card">
-    <h2>Nova sessão de treinamento</h2>
-    <p class="muted">A aplicação usa um blueprint interno para orquestrar política, contrato de saída e rubrica. Para a experiência do usuário, o ajuste principal fica em persona, cenário e especialidade.</p>
-
-    <div class="internal-blueprint">
-      <strong>Blueprint da aplicação</strong>
-      <span class="muted">Mantido como configuração interna da sessão. Caso precise alterar, use o catálogo administrativo.</span>
-    </div>
-
-    <form method="post" action="{% url 'launch-simulation' %}" id="launch-form">
-      {% csrf_token %}
-      <div class="sr-only-field" aria-hidden="true">
-        {{ launch_form.blueprint }}
-      </div>
-
-      <div class="field">
-        <label for="id_persona">Persona médica</label>
-        {{ launch_form.persona }}
-        <div class="help">Define o perfil do médico que será simulado na conversa.</div>
-      </div>
-      <div class="field">
-        <label for="id_scenario">Cenário clínico</label>
-        {{ launch_form.scenario }}
-        <div class="help">Contexto clínico, objetivo da visita e tensão principal do treino.</div>
-      </div>
-      <div class="field">
-        <label for="id_specialty">Especialidade</label>
-        {{ launch_form.specialty }}
-        <div class="help">Ajusta profundidade, vocabulário e tipo de objeções esperadas.</div>
-      </div>
-      <button type="submit">Iniciar sessão</button>
-    </form>
-  </div>
-
-  <div class="catalog-column">
-    <div class="card">
-      <h3>O que a experiência já suporta</h3>
-      <div class="list">
-        <div class="list-item">Treino orientado com médico simulado em tempo real.</div>
-        <div class="list-item">Persistência de sessões, turns e agent runs.</div>
-        <div class="list-item">Avaliação automática com score global e dimensões.</div>
-        <div class="list-item">Apoio factual quando a Knowledge Base precisa ser consultada.</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>Catálogo ativo</h3>
-      <div class="list">
-        {% for blueprint in blueprints %}
-          <div class="list-item">
-            <strong>{{ blueprint.title }}</strong><br>
-            <span class="muted">Persona: {{ blueprint.persona.title }} · Cenário: {{ blueprint.scenario.title }} · Especialidade: {{ blueprint.specialty.title }}</span>
-          </div>
-        {% empty %}
-          <div class="list-item">Nenhum blueprint ativo encontrado.</div>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-</section>
 {% endblock %}
+
 {% block extra_head %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -128,11 +147,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (!blueprintField.value) {
     const options = Array.from(blueprintField.options || []);
-    const preferred = options.find(opt => /default/i.test(opt.textContent) || /default/i.test(opt.value));
     const fallback = options.find(opt => opt.value);
-    const selected = preferred || fallback;
-    if (selected) {
-      blueprintField.value = selected.value;
+    if (fallback) {
+      blueprintField.value = fallback.value;
     }
   }
 });
