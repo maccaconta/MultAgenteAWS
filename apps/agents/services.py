@@ -13,6 +13,19 @@ from apps.conversations.models import ConversationSession
 
 class BedrockNativeSupervisorOrchestrator:
     OPTION_MAP = {"1": "simular_conversa", "2": "trabalhar_objecoes", "3": "montar_abordagem"}
+    VALID_EVAL_KEYS = {
+        "score_global",
+        "clareza",
+        "investigacao_de_necessidade",
+        "dominio_tecnico",
+        "manejo_de_objecoes",
+        "compliance",
+        "feedback_curto",
+        "proximo_passo",
+        "strengths",
+        "improvements",
+        "dimensions",
+    }
 
     def __init__(self, bedrock: BedrockAgentPlatformClient | None = None) -> None:
         self.bedrock = bedrock or BedrockAgentPlatformClient()
@@ -77,13 +90,13 @@ class BedrockNativeSupervisorOrchestrator:
     @classmethod
     def _classify_question(cls, text: str) -> str:
         t = (text or "").lower().strip()
-        hard_factual_terms = [
+        factual_terms = [
             "dosagem", "dose", "mg", "posologia", "bula", "indicacao", "indicação", "para que serve", "forma farmaceutica",
             "forma farmacêutica", "apresentacao", "apresentação", "mecanismo", "efeito", "efeitos", "composicao", "composição",
             "contraindicacao", "contraindicação", "base de conhecimento", "documento", "guideline", "estudo", "protocolo",
             "responsavel tecnico", "responsável técnico", "farmaceutico responsável", "farmacêutico responsável", "registro", "crf", "quem é", "quem e",
         ]
-        if any(term in t for term in hard_factual_terms) or cls._contains_person_query(t):
+        if any(term in t for term in factual_terms) or cls._contains_person_query(t):
             return "factual_documental"
         training_terms = ["como conversar", "como abordar", "como explicar", "como apresentar", "como falar", "simule", "simular", "treinar", "treino", "explique", "resuma", "objeção", "objecao", "objeções", "objecoes"]
         if any(term in t for term in training_terms):
@@ -175,11 +188,13 @@ class BedrockNativeSupervisorOrchestrator:
     def _summarize_traces(cls, traces: list[dict[str, Any]] | None) -> dict[str, Any]:
         flat = cls._flatten_any(traces or [])
         lower = flat.lower()
-        consultation_seen = any(token in lower for token in ["consultation", "consulta", "mlp8gvtsyx", "gtp5hlthjf"])
-        evaluation_seen = any(token in lower for token in ["evaluation", "avaliacao", "avaliação", "nshp4aaekt", "se4ugp8ftg", "score_global", "clareza", "manejo_de_objecoes"])
-        retrieval_seen = any(token in lower for token in ["retrieval", "retrieve", "knowledgebase", "knowledge base", "vector", "chunk", "citation", "citations", "s3://", "somalgin_cardio", "x-amz-bedrock-kb-chunk-id"])
-        failure_seen = any(token in lower for token in ["not available", "resource not found", "access denied", "validationexception", "exception", "failure", "erro", "error"])
-        return {"consultation_seen": consultation_seen, "evaluation_seen": evaluation_seen, "retrieval_seen": retrieval_seen, "failure_seen": failure_seen, "raw_excerpt": flat[:2500]}
+        return {
+            "consultation_seen": any(token in lower for token in ["consultation", "consulta", "mlp8gvtsyx", "gtp5hlthjf"]),
+            "evaluation_seen": any(token in lower for token in ["evaluation", "avaliacao", "avaliação", "nshp4aaekt", "se4ugp8ftg", "score_global", "clareza", "manejo_de_objecoes"]),
+            "retrieval_seen": any(token in lower for token in ["retrieval", "retrieve", "knowledgebase", "knowledge base", "vector", "chunk", "citation", "citations", "s3://", "somalgin_cardio", "x-amz-bedrock-kb-chunk-id"]),
+            "failure_seen": any(token in lower for token in ["not available", "resource not found", "access denied", "validationexception", "exception", "failure", "erro", "error"]),
+            "raw_excerpt": flat[:2500],
+        }
 
     @staticmethod
     def _looks_like_human_answer(text: str) -> bool:
@@ -303,36 +318,61 @@ class BedrockNativeSupervisorOrchestrator:
         except Exception as exc:
             return {"ok": False, "text": "", "citations": [], "traces": [], "reason": str(exc)}
 
+    def _sanitize_evaluation_payload(self, evaluation: dict[str, Any]) -> dict[str, Any]:
+        if not isinstance(evaluation, dict):
+            return {}
+        filtered = {k: v for k, v in evaluation.items() if k in self.VALID_EVAL_KEYS}
+        numeric_dims = []
+        for key in ["clareza", "investigacao_de_necessidade", "dominio_tecnico", "manejo_de_objecoes", "compliance"]:
+            value = filtered.get(key)
+            if isinstance(value, (int, float)) and 0 <= value <= 10:
+                numeric_dims.append(key)
+            elif key in filtered:
+                filtered.pop(key, None)
+        score = filtered.get("score_global")
+        has_score = isinstance(score, (int, float)) and 0 <= score <= 10
+        has_feedback = bool(filtered.get("feedback_curto")) or bool(filtered.get("proximo_passo"))
+        if has_score or len(numeric_dims) >= 2 or has_feedback:
+            return filtered
+        return {}
+
     def _extract_evaluation_from_traces(self, traces: list[dict[str, Any]] | None) -> dict[str, Any]:
         flat = self._flatten_any(traces or [])
         if not flat:
             return {}
-        # Try JSON blob
-        json_match = re.search(r'(\{[^{}]*"score_global"[^{}]*\})', flat)
+        json_match = re.search(r'(\{[^{}]{0,600}"score_global"[^{}]{0,1200}\})', flat)
         if json_match:
             try:
                 data = json.loads(json_match.group(1))
                 if isinstance(data, dict):
-                    return data
+                    return self._sanitize_evaluation_payload(data)
             except Exception:
                 pass
-        payload = {}
+
+        payload: dict[str, Any] = {}
         patterns = {
-            "score_global": r"score_global[^0-9]{0,10}([0-9]+(?:\.[0-9]+)?)",
-            "clareza": r"clareza[^0-9]{0,10}([0-9]+(?:\.[0-9]+)?)",
-            "investigacao_de_necessidade": r"investigacao_de_necessidade[^0-9]{0,10}([0-9]+(?:\.[0-9]+)?)",
-            "dominio_tecnico": r"dominio_tecnico[^0-9]{0,10}([0-9]+(?:\.[0-9]+)?)",
-            "manejo_de_objecoes": r"manejo_de_objecoes[^0-9]{0,10}([0-9]+(?:\.[0-9]+)?)",
-            "compliance": r"compliance[^0-9]{0,10}([0-9]+(?:\.[0-9]+)?)",
+            "score_global": r"score_global[^0-9]{0,12}([0-9]+(?:\.[0-9]+)?)",
+            "clareza": r"clareza[^0-9]{0,12}([0-9]+(?:\.[0-9]+)?)",
+            "investigacao_de_necessidade": r"investigacao_de_necessidade[^0-9]{0,12}([0-9]+(?:\.[0-9]+)?)",
+            "dominio_tecnico": r"dominio_tecnico[^0-9]{0,12}([0-9]+(?:\.[0-9]+)?)",
+            "manejo_de_objecoes": r"manejo_de_objecoes[^0-9]{0,12}([0-9]+(?:\.[0-9]+)?)",
+            "compliance": r"compliance[^0-9]{0,12}([0-9](?:\.[0-9]+)?)",
         }
         for key, pattern in patterns.items():
             m = re.search(pattern, flat, flags=re.IGNORECASE)
             if m:
-                payload[key] = float(m.group(1)) if "." in m.group(1) else int(m.group(1))
+                value = float(m.group(1)) if "." in m.group(1) else int(m.group(1))
+                payload[key] = value
+
         feedback = re.search(r"(feedback_curto|comentario|comentário)[^A-Za-z0-9]{0,10}([^\.]{10,180})", flat, flags=re.IGNORECASE)
         if feedback:
             payload["feedback_curto"] = feedback.group(2).strip()
-        return payload
+
+        next_step = re.search(r"(proximo_passo|próximo passo)[^A-Za-z0-9]{0,10}([^\.]{10,180})", flat, flags=re.IGNORECASE)
+        if next_step:
+            payload["proximo_passo"] = next_step.group(2).strip()
+
+        return self._sanitize_evaluation_payload(payload)
 
     def _build_structured_timeline(self, retrieval_hints: dict[str, Any], compliance: dict[str, Any], final_reply: str, citations: list[dict[str, Any]], parsed: dict[str, Any], prompt_header: str, trace_summary: dict[str, Any], evaluation_payload: dict[str, Any]) -> list[dict[str, Any]]:
         qtype = retrieval_hints.get("question_type", "treinamento_orientado")
@@ -500,7 +540,7 @@ class BedrockNativeSupervisorOrchestrator:
             elif not self._already_has_tail(final_reply):
                 final_reply += self._training_tail()
 
-        evaluation_payload = parsed.get("evaluation") or {}
+        evaluation_payload = self._sanitize_evaluation_payload(parsed.get("evaluation") or {})
         if not evaluation_payload and trace_summary.get("evaluation_seen"):
             evaluation_payload = self._extract_evaluation_from_traces(invoked.traces)
 
