@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Treinamento de Propagandistas{% endblock %}</title>
+  <style>
+    :root {
+      --bg: #08111f;
+      --bg-2: #0d1830;
+      --panel: rgba(13, 24, 48, 0.82);
+      --panel-strong: rgba(15, 28, 56, 0.96);
+      --panel-soft: rgba(255,255,255,0.04);
+      --text: #eef4ff;
+      --muted: #98a6c7;
+      --muted-2: #7c8cae;
+      --primary: #6ea8ff;
+      --primary-2: #8e7dff;
+      --border: rgba(140, 164, 213, 0.18);
+      --border-strong: rgba(140, 164, 213, 0.28);
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+      --ok: #1fb874;
+      --warn: #ffb020;
+      --danger: #e86b7a;
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(122, 162, 255, 0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(155, 140, 255, 0.16), transparent 24%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+      color: var(--text);
+    }
+    a { color: var(--primary); text-decoration: none; }
+    .container { width: min(1440px, calc(100% - 32px)); margin: 0 auto; }
+    header {
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      background: rgba(8, 17, 31, 0.78);
+      z-index: 20;
+    }
+    .nav {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 16px 0;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(110,168,255,.22), rgba(142,125,255,.18));
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+      font-size: 18px;
+    }
+    .brand-text small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .nav-links { display:flex; gap:16px; align-items:center; color: var(--muted); }
+    .nav-user {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+      color: var(--text);
+      font-weight: 600;
+    }
+    .btn, button, input[type=submit] {
+      border: none;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: white;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(110, 168, 255, 0.22);
+    }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      box-shadow: none;
+    }
+    .hero { padding: 34px 0 24px; }
+    .hero h1 { font-size: clamp(28px, 3.6vw, 42px); margin: 0 0 10px; }
+    .hero p { margin: 0; max-width: 920px; color: var(--muted); line-height: 1.65; }
+    .grid { display:grid; gap: 18px; }
+    .grid-2 { grid-template-columns: 1.35fr .85fr; }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .card {
+      background: linear-gradient(180deg, rgba(18, 30, 58, .94), rgba(12, 22, 44, .98));
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255,255,255,.14), rgba(255,255,255,0));
+      pointer-events: none;
+    }
+    .card h2, .card h3, .card h4 { margin-top: 0; }
+    .muted { color: var(--muted); }
+    .help { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+    .list { display:grid; gap: 12px; }
+    .list-item {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.06);
+      background: rgba(255,255,255,.03);
+    }
+    .pill {
+      display:inline-flex;
+      padding:7px 12px;
+      border-radius:999px;
+      background: rgba(122,162,255,.12);
+      color: #d3e1ff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      border: 1px solid rgba(122,162,255,.18);
+    }
+    .room-layout { display:grid; gap:20px; grid-template-columns: 300px minmax(0, 1fr) 340px; align-items: start; }
+    .chat-stream { max-height: 58vh; overflow:auto; display:grid; gap: 14px; padding-right:4px; }
+    .bubble {
+      max-width: 78%;
+      padding: 14px 16px;
+      border-radius: 18px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .bubble.user {
+      margin-left: auto;
+      background: linear-gradient(180deg, rgba(94, 143, 255, 0.18), rgba(94, 143, 255, 0.12));
+    }
+    .bubble.assistant { background: rgba(255,255,255,.05); }
+    .message-meta { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .composer { display:grid; grid-template-columns: 1fr auto; gap: 12px; margin-top: 16px; }
+    .score { font-size: 28px; font-weight: 800; }
+    .dim { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+    .dim:last-child { border-bottom:none; }
+    .footer-note { color: var(--muted); font-size: 13px; padding: 24px 0 40px; }
+
+    form .field { margin-bottom: 16px; }
+    label { display:block; margin-bottom: 8px; font-weight: 700; color: var(--text); }
+    select, input[type=text], input[type=password], textarea {
+      width: 100%;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      outline: none;
+      font: inherit;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    select {
+      appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+      background-position:
+        calc(100% - 18px) calc(50% - 3px),
+        calc(100% - 12px) calc(50% - 3px),
+        0 0;
+      background-size: 6px 6px, 6px 6px, 100% 100%;
+      background-repeat: no-repeat;
+      padding-right: 38px;
+    }
+    select option {
+      background: #0d1830;
+      color: #eef4ff;
+    }
+    select:focus, textarea:focus, input[type=text]:focus, input[type=password]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(110, 168, 255, 0.16), inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    textarea { min-height: 96px; resize: vertical; }
+
+    .sr-only-field {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      border: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    }
+
+    @media (max-width: 1180px) {
+      .room-layout { grid-template-columns: 280px minmax(0, 1fr); }
+      .room-layout > :last-child { grid-column: 1 / -1; }
+    }
+    @media (max-width: 980px) {
+      .grid-2, .room-layout, .grid-3, .composer { grid-template-columns: 1fr; }
+      .bubble { max-width: 100%; }
+      .nav { align-items: flex-start; }
+      .nav-links { flex-wrap: wrap; justify-content: flex-end; }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+<header>
+  <div class="container nav">
+    <div class="brand">
+      <span class="brand-mark">🎓</span>
+      <div class="brand-text">
+        Treinamento de Propagandistas
+        <small>Simulação multiagente com Bedrock</small>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="/">Dashboard</a>
+      <a href="/admin/">Admin</a>
+      {% if request.user.is_authenticated %}
+        <span class="nav-user">{{ request.user.username }}</span>
+      {% else %}
+        <a href="/accounts/login/">Entrar</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+<main class="container">
+  {% block content %}{% endblock %}
+  <div class="footer-note">Treinamento para propagandistas com médico simulado</div>
+</main>
+</body>
+</html>
