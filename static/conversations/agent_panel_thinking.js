@@ -11,9 +11,8 @@
     const panel = document.querySelector("[data-agents-panel]");
     if (!panel) return;
     updateThinkingState(panel);
-
     const observer = new MutationObserver(() => updateThinkingState(panel));
-    observer.observe(panel, { childList: true, subtree: true, attributes: true });
+    observer.observe(panel, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-status", "class"] });
   }
 
   if (document.readyState === "loading") {
