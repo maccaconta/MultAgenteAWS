@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Treinamento de Propagandistas{% endblock %}
+
+{% block session_drawer %}
+<form method="post" action="{% url 'launch-simulation' %}" id="launch-form-drawer">
+  {% csrf_token %}
+  <div class="sr-only-field" aria-hidden="true">
+    {{ launch_form.blueprint }}
+  </div>
+
+  <div class="field">
+    <label for="id_persona">Persona médica</label>
+    {{ launch_form.persona }}
+    <div class="help">Selecione o perfil principal do médico para a próxima conversa.</div>
+  </div>
+
+  <div class="field">
+    <label for="id_scenario">Cenário clínico</label>
+    {{ launch_form.scenario }}
+    <div class="help">Defina o contexto que vai orientar abordagem e objeções.</div>
+  </div>
+
+  <div class="field">
+    <label for="id_specialty">Especialidade</label>
+    {{ launch_form.specialty }}
+    <div class="help">Ajuste a profundidade técnica e o vocabulário do treino.</div>
+  </div>
+
+  <button type="submit">Iniciar sessão</button>
+</form>
+{% endblock %}
+
+{% block info_panel %}
+<div class="card">
+  <div class="pill">Visão da ferramenta</div>
+  <h2>Bedrock multiagente para treinamento de propagandistas</h2>
+  <p class="muted" style="text-align:center; line-height:1.65; margin-top:0;">
+    Interface com linguagem visual de IA para compor persona, cenário e especialidade de forma mais intuitiva e orientada à conversa.
+  </p>
+</div>
+
+<div class="card">
+  <div class="pill">Como usar</div>
+  <h3>Monte a próxima conversa a partir do perfil do médico</h3>
+  <p class="muted" style="text-align:center; line-height:1.65; margin-top:0;">
+    Selecione um personagem, ajuste especialidade e cenário no próprio card e siga direto para a sala de simulação.
+  </p>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="persona-experience">
+  <div class="persona-grid">
+    {% for persona in personas %}
+    <article class="persona-card">
+      <div class="persona-avatar">
+        {% if persona.image %}
+          <img src="{{ persona.image.url }}" alt="{{ persona.title }}">
+        {% else %}
+          <div class="persona-avatar-fallback">👤</div>
+        {% endif %}
+      </div>
+
+      <div class="persona-label">{{ persona.title }}</div>
+
+      <form method="post" action="{% url 'launch-simulation' %}" class="persona-form">
+        {% csrf_token %}
+        <input type="hidden" name="persona" value="{{ persona.id }}">
+        {% if launch_form.blueprint.value %}
+          <input type="hidden" name="blueprint" value="{{ launch_form.blueprint.value }}">
+        {% elif launch_form.blueprint.field.queryset|length %}
+          <input type="hidden" name="blueprint" value="{{ launch_form.blueprint.field.queryset.0.pk }}">
+        {% endif %}
+
+        <div class="field">
+          <label for="specialty_{{ persona.id }}">Especialidade</label>
+          <select id="specialty_{{ persona.id }}" name="specialty" required>
+            <option value="">Selecione</option>
+            {% for specialty in specialties %}
+              <option value="{{ specialty.id }}">{{ specialty.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="scenario_{{ persona.id }}">Cenário</label>
+          <select id="scenario_{{ persona.id }}" name="scenario" required>
+            <option value="">Selecione</option>
+            {% for scenario in scenarios %}
+              <option value="{{ scenario.id }}">{{ scenario.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button type="submit" class="persona-launch">Abrir conversa</button>
+      </form>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<style>
+  .persona-experience {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  .persona-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+    align-items: stretch;
+  }
+
+  .persona-card {
+    width: 205px;
+    position: relative;
+    padding: 14px;
+    border-radius: 20px;
+    background:
+      linear-gradient(180deg, rgba(10, 20, 42, 0.84), rgba(8, 14, 30, 0.94));
+    border: 1px solid rgba(121, 215, 255, 0.18);
+    box-shadow:
+      0 18px 42px rgba(0,0,0,.26),
+      0 0 0 1px rgba(121, 215, 255, 0.04) inset;
+    overflow: hidden;
+    flex: 0 0 205px;
+  }
+
+  .persona-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255,255,255,.18), rgba(255,255,255,0));
+  }
+
+  .persona-avatar {
+    height: 108px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(circle at 50% 25%, rgba(121,215,255,.18), transparent 56%),
+      linear-gradient(180deg, rgba(12, 22, 48, 0.94), rgba(8, 14, 30, 0.96));
+    border: 1px solid rgba(121, 215, 255, 0.18);
+    box-shadow: inset 0 0 26px rgba(121,215,255,.06);
+    overflow: hidden;
+    margin-bottom: 10px;
+    font-size: 44px;
+  }
+
+  .persona-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .persona-avatar-fallback {
+    color: #8ce8ff;
+    opacity: 0.92;
+  }
+
+  .persona-label {
+    font-size: 15px;
+    font-weight: 800;
+    color: #f3f7ff;
+    margin-bottom: 10px;
+    text-align: center;
+    min-height: 18px;
+  }
+
+  .persona-form {
+    display: grid;
+    gap: 8px;
+  }
+
+  .persona-form .field {
+    margin-bottom: 0;
+  }
+
+  .persona-form label {
+    font-size: 11px;
+    margin-bottom: 5px;
+  }
+
+  .persona-form select {
+    padding: 9px 11px;
+    padding-right: 38px;
+    border-radius: 11px;
+    font-size: 12px;
+  }
+
+  .persona-launch {
+    margin-top: 2px;
+    min-height: 36px;
+    font-size: 12px;
+  }
+
+  @media (max-width: 780px) {
+    .persona-card {
+      width: 180px;
+      flex-basis: 180px;
+    }
+    .persona-avatar {
+      height: 96px;
+    }
+  }
+</style>
+{% endblock %}
