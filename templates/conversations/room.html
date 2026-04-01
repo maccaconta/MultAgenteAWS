@@ -20,7 +20,9 @@
       </div>
       <div class="hero-meta-bar">
         <div class="hero-agents-inline-wrap">
-          <div class="hero-avatar-summary">
+          
+          
+          <!-- <div class="hero-avatar-summary">
             <div class="hero-avatar">
               <img src="{% static 'admin/img/background/persona1.png' %}" alt="{{ session.persona.title }}">
             </div>
@@ -28,7 +30,9 @@
               <div class="hero-avatar-name">{{ session.persona.title }}</div>
               <div class="hero-avatar-description"> {{ session.persona.description }}</div>
             </div>
-          </div>
+          </div> -->
+
+
           <div class="hero-agents-inline">
             <span class="hero-agent-chip"><span>⭐</span> Supervisor</span>
             <span class="hero-agent-chip"><span>🔍</span> Consulta</span>
@@ -46,6 +50,26 @@
 
     <section class="room-layout">
       <aside class="grid">
+
+        <aside class="grid">
+          <div class="card hero-avatar-summary-side">
+            <div class="hero-avatar">
+              <img src="{% static 'admin/img/background/persona1.png' %}" alt="{{ session.persona.title }}">
+            </div>
+            <div class="hero-avatar-copy">
+              <div class="hero-avatar-name">{{ session.persona.title }}</div>
+              <div class="hero-avatar-description">
+                {{ session.persona.description|default:"Sem descrição disponível." }}
+              </div>
+            </div>
+          </div>
+
+          <!-- <div class="card" id="evaluation-panel">
+            ...
+          </div> -->
+        </aside>
+
+
         <div class="card" id="evaluation-panel">
           <div class="panel-title-row"><div><div class="panel-kicker">Monitoramento</div><h3>Avaliação corrente</h3></div></div>
           <div class="score" id="score-global">--</div>
@@ -132,6 +156,49 @@
   .hero-avatar-copy{display:grid;gap:4px}
   .hero-avatar-name{font-size:13px;font-weight:800;color:#eef5ff}
   .hero-avatar-description{font-size:12px;color:var(--muted);line-height:1.4;max-width:240px}
+
+  .hero-avatar-summary-side{
+    display:grid;
+    grid-template-columns:72px 1fr;
+    gap:14px;
+    align-items:start;
+    padding:18px;
+  }
+
+  .hero-avatar-summary-side .hero-avatar{
+    width:72px;
+    height:72px;
+    border-radius:18px;
+    overflow:hidden;
+    border:1px solid rgba(121,215,255,.18);
+    background:rgba(255,255,255,.04);
+    flex:none;
+  }
+
+  .hero-avatar-summary-side .hero-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+
+  .hero-avatar-summary-side .hero-avatar-copy{
+    display:grid;
+    gap:6px;
+  }
+
+  .hero-avatar-summary-side .hero-avatar-name{
+    font-size:15px;
+    font-weight:800;
+    color:#eef5ff;
+  }
+
+  .hero-avatar-summary-side .hero-avatar-description{
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.55;
+    max-width:none;
+  }
+
   .hero-agents-inline{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
   .hero-agent-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);font-size:12px;font-weight:700}
   .hero-processing-indicator{display:inline-flex;align-items:center;gap:12px;min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.03em}

@@ -9,7 +9,7 @@
 
     .nav-right img.logo-ntt {
       width: auto !important;
-      height: 56px !important;
+      height: 40px !important;
       max-width: none !important;
       max-height: none !important;
       object-fit: contain;
@@ -28,11 +28,13 @@
     .nav{min-height:var(--header-height);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:18px;padding:14px 0}
     .nav-left,.nav-right{display:flex;align-items:center;gap:12px}
     .nav-right img{max-width:86px;max-height:40px;object-fit:contain;filter:drop-shadow(0 4px 14px rgba(0,0,0,.18))}
-    .nav-right .bedrock-mini{max-width:42px;max-height:42px}
+    .nav-right .bedrock-mini{max-width:130px;max-height:70px;padding-right: 15px;}
+
+
     .icon-button{width:54px;height:54px;border-radius:18px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(121,215,255,.14),rgba(98,168,255,.06)),rgba(255,255,255,.03);border:1px solid rgba(121,215,255,.22);box-shadow:0 12px 28px rgba(17,39,78,.22),inset 0 1px 0 rgba(255,255,255,.08);color:#dff6ff;cursor:pointer}
     .icon-button.secondary{width:auto;min-width:54px;padding:0 14px;gap:10px;color:#eaf2ff;font-weight:700}
     .hamburger-lines{width:22px;display:grid;gap:5px}.hamburger-lines span{display:block;height:2px;border-radius:999px;background:linear-gradient(90deg,var(--cyan),var(--violet))}
-    .nav-center{text-align:center;color:var(--muted);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+    .nav-center{text-align:center;color:#55cfff;font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding-left: 290px;}
     .session-drawer{position:fixed;top:0;left:0;width:var(--drawer-width);height:100vh;transform:translateX(calc(-1 * var(--drawer-width)));transition:transform .28s ease,box-shadow .28s ease;z-index:80;padding:104px 18px 18px;background:linear-gradient(180deg,rgba(8,12,30,.985),rgba(7,10,25,.994));border-right:1px solid rgba(121,215,255,.16);box-shadow:24px 0 64px rgba(0,0,0,.34);overflow-y:auto}
     body.drawer-open .session-drawer{transform:translateX(0)}
     .drawer-toggle{position:absolute;top:110px;right:-62px;width:62px;height:62px;border-radius:0 18px 18px 0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(121,215,255,.18),rgba(98,168,255,.08)),rgba(255,255,255,.03);border:1px solid rgba(121,215,255,.22);border-left:0;box-shadow:0 12px 24px rgba(17,39,78,.16);pointer-events:none}
@@ -102,7 +104,7 @@
         </div>
         <div class="nav-center">Treinamento de propagandistas</div>
         <div class="nav-right">
-          <img class="bedrock-mini" src="{% static 'admin/img/background/bedrock 2.png' %}" alt="Amazon Bedrock">
+          <img class="bedrock-mini" src="{% static 'admin/img/background/bedrock-logo-final.jpg' %}" alt="Amazon Bedrock">
           <img src="{% static 'admin/img/background/aws.png' %}" alt="AWS">
           <img src="{% static 'admin/img/background/nttdata.png' %}" class="logo-ntt" alt="NTT DATA">
           {% if request.path != '/' %}
